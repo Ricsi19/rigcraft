@@ -1,114 +1,95 @@
-# Receptgyűjtemény
+# RigCraft - Szamitogep konfiguracio osszeallito es osszehasonlito
 
-**Webes alkalmazás specifikáció**
-**Programrendszerek fejlesztése gyakorlat**
-**MEAN Stack – Demonstrációs projekt**
-**2026. tavasz**
+## 1. Projekt leiras
 
----
+A RigCraft egy webalkalmazas, amely segit egyedi PC konfiguraciok osszeallitasaban es tobb gep osszehasonlitasaban. A celkozonseg olyan felhasznalok, akik szeretnenek atlathato modon komponenseket valasztani, koltseget tervezni, majd teljesitmeny es ar alapjan donteni.
 
-## 1. Bevezetés
+A projekt hangsulya a minosegi frontend megvalositason van: reszponziv felulet, konzisztens design token rendszer, akadalymentes alapok, komponens alapu architektura es tiszta navigacio.
 
-A Receptgyűjtemény egy MEAN stack alapú webes alkalmazás, amely lehetővé teszi receptek létrehozását, böngészését és értékelését. A projekt célja a kurzus során tanult technológiák demonstrálása egy egyszerű, de teljes értékű CRUD rendszeren keresztül.
+## 2. Funkcionalis kovetelmenyek
 
-A rendszer két szerepkört különböztet meg: adminisztrátor és felhasználó. Az admin előre regisztrálva van, a felhasználók pedig a regisztrációs felületen keresztül hozhatnak létre fiókot.
+### 2.1 Alkatresz katalogus modul
 
-### 1.1. Technológiai stack
+- Komponensek listazasa (CPU, GPU, RAM, tarhely, alaplap).
+- Kereses nev alapjan.
+- Szures kategoria szerint.
+- Rendezes ar szerint.
 
-- **MongoDB** – NoSQL adatbázis
-- **Express.js** – Szerver oldali keretrendszer
-- **Angular** – Kliens oldali keretrendszer
-- **Node.js** – Futási környezet
+### 2.2 Konfiguracio kezeles modul
 
----
+- Uj konfiguracio letrehozasa kivalasztott komponensekbol.
+- Meglevo konfiguracio megtekintese, modositasa, torlese.
+- Ar osszesites es kompatibilitasi visszajelzes.
 
-## 2. Szerepkörök
+### 2.3 Osszehasonlitas modul
 
-### 2.1. Adminisztrátor
+- Legalabb 2 konfiguracio kivalasztasa osszehasonlitashoz.
+- Osszehasonlito tabla teljesitmeny, ar es fogyasztas adatokkal.
+- Elmentett osszehasonlitasok listaja.
 
-Az admin előre regisztrált fiókkal rendelkezik (seed adat). Jogosultságai:
+### 2.4 Admin modul
 
-- Kategóriák létrehozása, módosítása és törlése
-- Receptek létrehozása, módosítása és törlése
-- Összes értékelés megtekintése és moderálása (törlés)
+- Alkatreszek CRUD kezelese.
+- Kategoriak kezelese.
+- Kiemelt konfiguraciok karbantartasa.
 
-### 2.2. Felhasználó
+### 2.5 Profil modul
 
-A felhasználó a regisztrációs felületen keresztül hozhat létre fiókot. Jogosultságai:
+- Bejelentkezett felhasznalo mentett konfiguracioinak kezelese.
+- Kedvencek es korabbi osszehasonlitasok megtekintese.
 
-- Receptek böngészése és részleteinek megtekintése
-- Értékelés írása receptekhez
-- Saját értékeléseinek módosítása és törlése
-- Receptek szűrése kategória szerint
+## 3. Nem-funkcionalis kovetelmenyek
 
----
+### 3.1 Technologiai dontesek
 
-## 3. Funkcionális követelmények
+- Frontend: React + Vite + React Router.
+- Backend terv: FastAPI (Python) REST API.
+- Adatbazis terv: PostgreSQL (relacios modell).
+- Auth terv: email/jelszo + token alapu autentikacio.
 
-1. A felhasználó regisztrálhat az alkalmazásba felhasználónév, e-mail és jelszó megadásával.
-2. A felhasználó bejelentkezhet az e-mail és jelszó párosával, sikeres bejelentkezés után JWT tokent kap.
-3. Az admin kategóriákat hozhat létre, módosíthat és törölhet.
-4. Az admin recepteket hozhat létre hozzávalókkal együtt, módosíthatja és törölheti azokat.
-5. A bejelentkezett felhasználó értékelést írhat receptekhez (1–5 pontszám + opcionális komment).
-6. A felhasználó módosíthatja és törölheti a saját értékeléseit.
-7. Bárki (bejelentkezés nélkül is) böngészheti a recepteket és szűrhet kategória szerint.
-8. A recept részletei oldalon megjeleníthetőek a hozzávalók és az értékelések.
-9. Az adatbázis demo adatokat tartalmaz (legalább 3 kategória, 5 recept, hozzávalókkal).
+### 3.2 UX es minosegi elvarasok
 
----
+- Mobile-first layout legalabb 3 breakpointtal (mobil, tablet, desktop).
+- Accessibility alapok: szemantikus HTML, billentyuzetes navigacio, focus stilusok, megfelelo kontraszt.
+- Egyertelmu loading/error/empty allapotok.
+- Komponens alapu felosztas, ujrafelhasznalhato UI elemek.
 
-## 4. Nem-funkcionális követelmények
+### 3.3 Teljesitmeny elvarasok
 
-1. A jelszó tárolás bcrypt hash-sel történik.
-2. JWT alapú autentikáció, token lejárati idővel.
-3. Role-based hozzáférés-vezérlés middleware-rel megvalósítva.
-4. CORS konfiguráció a kliens-szerver kommunikációhoz.
-5. Hibakezelés: a szerver értelmes HTTP státuszkodokat és hibaüzeneteket ad vissza.
-6. Reszponzív felhasználói felület Angular Material komponensekkel.
+- Route alapu kod-szetvalasztas (lazy loading).
+- Kliens oldali listak szurese/rendezese kesleltetes nelkul.
+- Tiszta, atlathato allapotkezeles lokalis state es kontextus kombinaciojaval.
 
----
+## 4. Felhasznaloi szerepkorok
 
-## 5. Kliens oldali nézetek
+### 4.1 Latogato
 
-Az Angular alkalmazás az alábbi fő nézeteket (oldalakat) tartalmazza:
+- Nyilvanos oldalak bongeszese.
+- Katalogus keresese/szurese/rendezese.
+- Osszehasonlitasi nezet megtekintese.
 
-### 5.1. Nyilvános nézetek
+### 4.2 Regisztralt felhasznalo
 
-- **Kezdőlap** – Receptek listája, kategória szűrővel
-- **Recept részletek** – Leírás, hozzávalók, értékelések
-- **Bejelentkezés** – E-mail és jelszó megadása
-- **Regisztráció** – Új fiók létrehozása
+- Sajat konfiguraciok mentese es szerkesztese.
+- Osszehasonlitasok elmentese.
+- Profil oldali elozmenyek megtekintese.
 
-### 5.2. Bejelentkezett felhasználói nézetek
+### 4.3 Adminisztrator
 
-- **Értékelés írása / módosítása** – Pontszám és komment űrlap
+- Alkatresz, kategoria es tartalom adminisztracio.
+- Hibas vagy duplikalt elemek kezelese.
 
-### 5.3. Admin nézetek
+## 5. Kepernyo-lista es sitemap
 
-- **Kategória kezelés** – CRUD műveletek kategóriákra
-- **Recept kezelés** – CRUD műveletek receptekre és hozzávalókra
-- **Értékelés moderálás** – Értékelések áttekintése és törlése
+- / - Kezdolap
+- /catalog - Alkatresz katalogus
+- /builder - Konfigurator
+- /compare - Osszehasonlitas
+- /admin - Admin felulet
+- * - 404 oldal
 
----
+Navigacios logika:
 
-## 6. Telepítés és futtatás
-
-A rendszer minden komponense konténerizált formában lesz üzemeltetve. A rendszer futtatásához szükséges előfeltételek:
-
-- Node.js (v24)
-- MongoDB (lokális)
-- Angular CLI (v21)
-
----
-
-## 7. Mappaszerkezet
-
-A GitHub repository várt struktúrája:
-
-| Mappa / Fájl | Leírás |
-|---|---|
-| `/server` | Express.js szerver forráskód |
-| `/client` | Angular alkalmazás forráskód |
-| `/docs` | Dokumentáció (ez a specifikáció is) |
-| `/prompts` | AI prompt-ok és elemzés |
-| `README.md` | Telepítési útmutató |
+- A felso navigacio minden oldalon elerheto.
+- Az aktiv route vizualisan kiemelt.
+- Ismeretlen URL eseten egyedi 404 oldal jelenik meg.

@@ -1,0 +1,39 @@
+:root {
+  --font-body: "Segoe UI", "Trebuchet MS", sans-serif;
+  --font-display: "Aptos", "Franklin Gothic Medium", sans-serif;
+
+  --color-bg: #f7f5ef;
+  --color-surface: #fffdf8;
+  --color-surface-strong: #f1e8d2;
+  --color-text: #1f1d18;
+  --color-muted: #595548;
+  --color-primary: #0b6a57;
+  --color-primary-hover: #095646;
+  --color-secondary: #b35c19;
+  --color-focus: #004fe0;
+  --color-danger: #8f2020;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.8rem;
+  --radius-lg: 1.2rem;
+
+  --shadow-sm: 0 2px 8px rgba(25, 18, 8, 0.1);
+  --shadow-md: 0 14px 32px rgba(25, 18, 8, 0.14);
+
+  --step--1: clamp(0.82rem, 0.78rem + 0.25vw, 0.95rem);
+  --step-0: clamp(1rem, 0.94rem + 0.35vw, 1.2rem);
+  --step-1: clamp(1.2rem, 1.05rem + 0.75vw, 1.55rem);
+  --step-2: clamp(1.44rem, 1.18rem + 1.1vw, 2rem);
+  --step-3: clamp(1.73rem, 1.36rem + 1.7vw, 2.6rem);
+
+  --bp-tablet: 48rem;
+  --bp-desktop: 64rem;
+}
