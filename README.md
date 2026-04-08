@@ -64,7 +64,7 @@ Ha execution policy hiba van:
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
-Linux/macOS (ha szukseges):
+Linux:
 
 ```bash
 cd backend
