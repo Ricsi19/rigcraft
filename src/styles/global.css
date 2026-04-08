@@ -344,6 +344,76 @@ td {
   color: var(--color-muted);
 }
 
+.stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.inline-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.inline-checkbox input {
+  min-height: 1rem;
+  min-width: 1rem;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.line-item-row {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid #ddd4c0;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.list-row p {
+  margin: 0;
+}
+
+.toast {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  max-width: min(92vw, 24rem);
+  z-index: 999;
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #ddd4c0;
+  border-radius: var(--radius-md);
+  background: #fff;
+  box-shadow: var(--shadow-md);
+  padding: var(--space-2) var(--space-3);
+}
+
+.toast p {
+  margin: 0;
+}
+
+.toast-success {
+  border-left: 6px solid var(--color-primary);
+}
+
+.toast-error {
+  border-left: 6px solid var(--color-danger);
+}
+
 .skeleton-wrapper {
   display: grid;
   gap: var(--space-2);
@@ -386,6 +456,10 @@ td {
 
   .filter-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .line-item-row {
+    grid-template-columns: 2fr 6rem 1fr auto;
   }
 }
 

@@ -4,30 +4,30 @@
 
 ### 1. User
 
-- id: UUID
+- id: integer
 - email: string (unique)
 - password_hash: string
 - display_name: string
-- role_id: UUID
+- role_id: integer
 - created_at: datetime
 
 ### 2. Role
 
-- id: UUID
+- id: integer
 - name: enum (visitor, member, admin)
 - description: string
 
 ### 3. Category
 
-- id: UUID
+- id: integer
 - name: string
 - slug: string (unique)
 - created_at: datetime
 
 ### 4. Component
 
-- id: UUID
-- category_id: UUID
+- id: integer
+- category_id: integer
 - name: string
 - brand: string
 - socket_or_standard: string
@@ -38,8 +38,8 @@
 
 ### 5. Configuration
 
-- id: UUID
-- user_id: UUID
+- id: integer
+- user_id: integer
 - name: string
 - goal: string
 - total_price_huf: integer
@@ -49,24 +49,24 @@
 
 ### 6. ConfigurationItem
 
-- id: UUID
-- configuration_id: UUID
-- component_id: UUID
+- id: integer
+- configuration_id: integer
+- component_id: integer
 - quantity: integer
 - note: string (nullable)
 
 ### 7. Comparison
 
-- id: UUID
-- user_id: UUID
+- id: integer
+- user_id: integer
 - title: string
 - created_at: datetime
 
 ### 8. ComparisonItem
 
-- id: UUID
-- comparison_id: UUID
-- configuration_id: UUID
+- id: integer
+- comparison_id: integer
+- configuration_id: integer
 - rank_order: integer
 
 ## 2. Kapcsolatok
@@ -101,3 +101,9 @@
 - N:M kapcsolat 2: Comparison es Configuration kapcsolata a ComparisonItem kapcsolotablaval valosul meg.
 
 Ez a modell tamogatja a teljes CRUD funkciokat, a szerepkor alapu mukodest es a kereses/szures/rendezes kovetelmenyeit.
+
+## 4. Megvalositasi megjegyzes
+
+- Az alkalmazas SQLAlchemy ORM modellekkel kezeli a relacios adatokat.
+- Lokalis fejleszteshez SQLite fallback van beallitva (backend/.env).
+- Deployhoz PostgreSQL kapcsolat hasznalhato ugyanazzal a modellel.

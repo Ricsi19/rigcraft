@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "api:dev": "python -m uvicorn main:app --reload --app-dir backend",
+    "api:start": "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --app-dir backend"
   },
   "dependencies": {
     "react": "^18.3.1",

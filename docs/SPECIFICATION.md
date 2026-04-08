@@ -43,8 +43,8 @@ A projekt hangsulya a minosegi frontend megvalositason van: reszponziv felulet, 
 ### 3.1 Technologiai dontesek
 
 - Frontend: React + Vite + React Router.
-- Backend terv: FastAPI (Python) REST API.
-- Adatbazis terv: PostgreSQL (relacios modell).
+- Backend: FastAPI (Python) REST API.
+- Adatbazis: SQLAlchemy relacios modell (lokalisan SQLite, deployhoz PostgreSQL).
 - Auth terv: email/jelszo + token alapu autentikacio.
 
 ### 3.2 UX es minosegi elvarasok
@@ -93,3 +93,28 @@ Navigacios logika:
 - A felso navigacio minden oldalon elerheto.
 - Az aktiv route vizualisan kiemelt.
 - Ismeretlen URL eseten egyedi 404 oldal jelenik meg.
+
+## 6. Merfoldko 2 implementacios allapot
+
+### 6.1 Backend es perzisztencia
+
+- A frontend valodi HTTP hivassal kommunikal a backenddel.
+- A backend CRUD endpointokat ad a kategoriakra, alkatreszekre es konfiguraciokra.
+- A tablakat a backend startup soran automatikusan letrehozza.
+- Seed adatok automatikusan betoltodnek az elso inditaskor.
+
+### 6.2 Allapotkezelesi strategia
+
+- Kozponti allapot: React Context + reducer (kategoriak, alkatreszek, konfiguraciok, toast).
+- Reaktiv adatfolyam: API hivast koveto allapotfrissites automatikusan ujrarendereli a feluletet.
+- Form allapotkezeles: admin CRUD urlapok es konfiguracio editor kulon state-ekkel.
+- Derived state: konfiguracio osszar valos ideju szamitasa a kivalasztott tetelekbol.
+- URL-szinkron: katalogus oldalon a kereses/szures/rendezes query parameterekben tarolodik.
+
+### 6.3 Aszinkron es UX kezeles
+
+- Loading allapotok: kulon loader komponensek.
+- Hibakezeles: felhasznalobarat hiba allapot komponensek.
+- Empty state: ures listakhoz kulon visszajelzes.
+- Toast: sikeres/sikertelen muveleti visszajelzes.
+- Debounce: katalogus keresomezo 400 ms debounce-al.

@@ -1,33 +1,88 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
+import ErrorState from "../components/feedback/ErrorState";
+import LoadingState from "../components/feedback/LoadingState";
 import PageHeader from "../components/PageHeader";
-import { catalogItems } from "../data/mockData";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { categoryService } from "../services/categoryService";
+import { componentService } from "../services/componentService";
+import { useAppData } from "../store/AppDataContext";
 
 export default function CatalogPage() {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("price-asc");
+  const { state, dispatch } = useAppData();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") || "");
+  const [categoryId, setCategoryId] = useState(searchParams.get("categoryId") || "");
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "price_asc");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const debouncedQuery = useDebouncedValue(query, 400);
 
-  const filtered = useMemo(() => {
-    let result = [...catalogItems];
+  useEffect(() => {
+    const nextParams = new URLSearchParams();
+    if (query) {
+      nextParams.set("q", query);
+    }
+    if (categoryId) {
+      nextParams.set("categoryId", categoryId);
+    }
+    if (sortBy) {
+      nextParams.set("sort", sortBy);
+    }
+    setSearchParams(nextParams, { replace: true });
+  }, [query, categoryId, sortBy, setSearchParams]);
 
-    if (query.trim()) {
-      const searchValue = query.trim().toLowerCase();
-      result = result.filter((item) => item.name.toLowerCase().includes(searchValue));
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadComponents() {
+      setIsLoading(true);
+      setError("");
+      try {
+        const list = await componentService.list({
+          query: debouncedQuery,
+          categoryId,
+          sortBy
+        });
+        if (!isMounted) {
+          return;
+        }
+        dispatch({ type: "SET_COMPONENTS", payload: list });
+      } catch (err) {
+        if (!isMounted) {
+          return;
+        }
+        setError(err.message || "A katalogus betoltese sikertelen.");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     }
 
-    if (category !== "all") {
-      result = result.filter((item) => item.category === category);
-    }
+    loadComponents();
+    return () => {
+      isMounted = false;
+    };
+  }, [debouncedQuery, categoryId, sortBy, dispatch]);
 
-    if (sortBy === "price-asc") {
-      result.sort((a, b) => a.price - b.price);
-    } else {
-      result.sort((a, b) => b.price - a.price);
+  useEffect(() => {
+    async function loadCategoriesIfNeeded() {
+      if (state.categories.length > 0) {
+        return;
+      }
+      try {
+        const categories = await categoryService.list();
+        dispatch({ type: "SET_CATEGORIES", payload: categories });
+      } catch {
+        // Non-blocking: category filter can still function with empty list.
+      }
     }
+    loadCategoriesIfNeeded();
+  }, [state.categories.length, dispatch]);
 
-    return result;
-  }, [query, category, sortBy]);
+  const components = state.components;
 
   return (
     <>
@@ -51,43 +106,49 @@ export default function CatalogPage() {
 
           <label>
             <span>Kategoria</span>
-            <select value={category} onChange={(event) => setCategory(event.target.value)}>
-              <option value="all">Osszes</option>
-              <option value="CPU">CPU</option>
-              <option value="GPU">GPU</option>
-              <option value="RAM">RAM</option>
-              <option value="Storage">Storage</option>
-              <option value="Motherboard">Motherboard</option>
+            <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
+              <option value="">Osszes</option>
+              {state.categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           </label>
 
           <label>
             <span>Rendezes</span>
             <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-              <option value="price-asc">Ar szerint novekvo</option>
-              <option value="price-desc">Ar szerint csokkeno</option>
+              <option value="price_asc">Ar szerint novekvo</option>
+              <option value="price_desc">Ar szerint csokkeno</option>
+              <option value="name_asc">Nev szerint A-Z</option>
             </select>
           </label>
         </div>
       </section>
 
-      {filtered.length === 0 ? (
+      {isLoading ? <LoadingState text="Alkatreszek betoltese..." /> : null}
+      {!isLoading && error ? <ErrorState message={error} /> : null}
+
+      {!isLoading && !error && components.length === 0 ? (
         <EmptyState title="Nincs talalat" text="Probalj masik keresesi kifejezest vagy kategoriat." />
-      ) : (
+      ) : null}
+
+      {!isLoading && !error && components.length > 0 ? (
         <section className="card-grid" aria-label="Talalati lista">
-          {filtered.map((item) => (
+          {components.map((item) => (
             <article key={item.id} className="card component-card">
               <h3>{item.name}</h3>
               <p className="muted">{item.brand}</p>
-              <p>{item.category}</p>
-              <p className="price-tag">{item.price.toLocaleString("hu-HU")} Ft</p>
+              <p>{item.category_name}</p>
+              <p className="price-tag">{item.price_huf.toLocaleString("hu-HU")} Ft</p>
               <button type="button" className="btn btn-secondary">
                 Hozzaadas
               </button>
             </article>
           ))}
         </section>
-      )}
+      ) : null}
     </>
   );
 }

@@ -1,13 +1,54 @@
+import { useEffect, useState } from "react";
+import ErrorState from "../components/feedback/ErrorState";
+import LoadingState from "../components/feedback/LoadingState";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
-
-const stats = [
-  { label: "Elerheto alkatreszek", value: "1200+" },
-  { label: "Elmentett konfiguraciok", value: "358" },
-  { label: "Aktiv osszehasonlitasok", value: "79" }
-];
+import { statsService } from "../services/statsService";
 
 export default function HomePage() {
+  const [stats, setStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadStats() {
+      setIsLoading(true);
+      setError("");
+      try {
+        const result = await statsService.get();
+        if (!isMounted) {
+          return;
+        }
+        setStats(result);
+      } catch (err) {
+        if (!isMounted) {
+          return;
+        }
+        setError(err.message || "A statisztikak betoltese sikertelen.");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadStats();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const cards = stats
+    ? [
+        { label: "Elerheto kategoriak", value: stats.categories },
+        { label: "Elerheto alkatreszek", value: stats.components },
+        { label: "Elmentett konfiguraciok", value: stats.configurations },
+        { label: "Aktiv osszehasonlitasok", value: stats.comparisons }
+      ]
+    : [];
+
   return (
     <>
       <PageHeader
@@ -38,11 +79,15 @@ export default function HomePage() {
 
       <section aria-labelledby="home-stats-heading">
         <h3 id="home-stats-heading">Gyors statisztikak</h3>
-        <div className="card-grid">
-          {stats.map((item) => (
-            <StatCard key={item.label} label={item.label} value={item.value} />
-          ))}
-        </div>
+        {isLoading ? <LoadingState text="Statisztikak betoltese..." /> : null}
+        {!isLoading && error ? <ErrorState message={error} /> : null}
+        {!isLoading && !error ? (
+          <div className="card-grid">
+            {cards.map((item) => (
+              <StatCard key={item.label} label={item.label} value={item.value} />
+            ))}
+          </div>
+        ) : null}
       </section>
     </>
   );

@@ -47,3 +47,34 @@ Az AI egy korabbi peldaban egy masik tema (recept app) tartalmat javasolta, ami 
 - A temahoz nem illo reszeket teljesen lecsereltem.
 - Uj promptban egyertelmuen megadtam a sajat projekt cimet es a kotelezo merfoldko elemeket.
 - Az AI outputot csak szerkesztes utan hasznaltam, nem vettem at valtoztatas nelkul.
+
+## 2026-04-07 - Merfoldko 2 backend es adatintegracio
+
+### Prompt
+
+"Keszitsd el a 2. merfoldkot FastAPI + relacios adatmodell + frontend backend integracioval, legalabb ket entitason teljes CRUD-dal. Legyen fallback lehetoseg sqlite-al, hogy menjen postgres nelkul is."
+
+### AI valasz lenyege
+
+- FastAPI backend SQLAlchemy modellekkel es seed adattal
+- CRUD endpointok kategoriakra, alkatreszekre es konfiguraciokra
+- Frontend service reteg + context/reducer allapotkezeles
+- Loading/error/empty/toast/debounce/URL-sync megoldasok
+- sqlite fallback
+
+### Ertekeles
+
+- Elfogadva: igen, de ellenorzessel
+- Modositva: igen
+- Miert: a futtatasi lepeseket reszletesebbre bovitettuk, es a dokumentaciot a tenyleges kodhoz igazitottuk.
+
+## 2026-04-07 - AI korlat es javitas
+
+### Problema
+
+Az adatmodell dokumentacio kezdetben UUID tipust tartalmazott, mikozben a tenyleges implementacio integer azonositoikat hasznal.
+
+### Kezeles
+
+- Az adatmodell dokumentaciot frissitettem integer ID-kre.
+- Hozzaadtam megvalositasi megjegyzest a SQLite fejlesztesi fallback + PostgreSQL deploy modellrol.
