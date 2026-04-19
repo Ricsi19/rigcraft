@@ -725,6 +725,79 @@ def delete_configuration(
     return None
 
 
+def map_comparison(comparison: models.Comparison) -> schemas.ComparisonRead:
+    return schemas.ComparisonRead(
+        id=comparison.id,
+        user_id=comparison.user_id,
+        title=comparison.title,
+        created_at=comparison.created_at,
+        items=[
+            schemas.ComparisonItemRead(
+                id=item.id,
+                configuration_id=item.configuration_id,
+                configuration_name=item.configuration.name if item.configuration else "Unknown",
+                rank_order=item.rank_order,
+            )
+            for item in sorted(comparison.items, key=lambda row: row.rank_order)
+        ],
+    )
+
+
+@app.post("/comparisons", response_model=schemas.ComparisonRead, status_code=status.HTTP_201_CREATED)
+def create_comparison(
+    payload: schemas.ComparisonCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    ids = []
+    seen = set()
+    for value in payload.configuration_ids:
+        if value in seen:
+            continue
+        seen.add(value)
+        ids.append(value)
+
+    if len(ids) < 2:
+        raise HTTPException(status_code=400, detail="At least 2 unique configurations are required")
+
+    is_admin = current_user.role and current_user.role.name == "admin"
+    visible_configs = db.scalars(
+        select(models.Configuration).where(models.Configuration.id.in_(ids))
+    ).all()
+    visible_map = {cfg.id: cfg for cfg in visible_configs}
+
+    for cfg_id in ids:
+        cfg = visible_map.get(cfg_id)
+        if not cfg:
+            raise HTTPException(status_code=400, detail=f"Invalid configuration id: {cfg_id}")
+        if not is_admin and not cfg.is_public and cfg.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only compare your own or public configurations")
+
+    comparison = models.Comparison(user_id=current_user.id, title=payload.title.strip())
+    db.add(comparison)
+    db.flush()
+
+    for index, cfg_id in enumerate(ids, start=1):
+        db.add(
+            models.ComparisonItem(
+                comparison_id=comparison.id,
+                configuration_id=cfg_id,
+                rank_order=index,
+            )
+        )
+
+    db.commit()
+
+    created = db.scalar(
+        select(models.Comparison)
+        .where(models.Comparison.id == comparison.id)
+        .options(joinedload(models.Comparison.items).joinedload(models.ComparisonItem.configuration))
+    )
+    if not created:
+        raise HTTPException(status_code=404, detail="Comparison not found")
+    return map_comparison(created)
+
+
 @app.get("/comparisons", response_model=list[schemas.ComparisonRead])
 def list_comparisons(
     db: Session = Depends(get_db),
@@ -740,21 +813,4 @@ def list_comparisons(
         .order_by(desc(models.Comparison.created_at))
     ).unique().all()
 
-    return [
-        schemas.ComparisonRead(
-            id=comparison.id,
-            user_id=comparison.user_id,
-            title=comparison.title,
-            created_at=comparison.created_at,
-            items=[
-                schemas.ComparisonItemRead(
-                    id=item.id,
-                    configuration_id=item.configuration_id,
-                    configuration_name=item.configuration.name if item.configuration else "Unknown",
-                    rank_order=item.rank_order,
-                )
-                for item in sorted(comparison.items, key=lambda row: row.rank_order)
-            ],
-        )
-        for comparison in comps
-    ]
+    return [map_comparison(comparison) for comparison in comps]

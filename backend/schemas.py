@@ -139,6 +139,11 @@ class ComparisonRead(BaseModel):
     items: list[ComparisonItemRead]
 
 
+class ComparisonCreateRequest(BaseModel):
+    title: str = Field(min_length=2, max_length=120)
+    configuration_ids: list[int] = Field(min_length=2)
+
+
 class StatsRead(BaseModel):
     categories: int
     components: int

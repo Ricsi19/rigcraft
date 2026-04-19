@@ -4,19 +4,15 @@ export default function ComparisonTable({ rows }) {
       <table>
         <thead>
           <tr>
-            <th scope="col">Jellemző</th>
-            <th scope="col">Esport Build</th>
-            <th scope="col">Creator Build</th>
-            <th scope="col">Budget Build</th>
+            <th scope="col">Sorrend</th>
+            <th scope="col">Konfiguráció neve</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.label}>
-              <th scope="row">{row.label}</th>
-              <td>{row.esport}</td>
-              <td>{row.creator}</td>
-              <td>{row.budget}</td>
+            <tr key={`${row.rank_order}-${row.configuration_name}`}>
+              <th scope="row">#{row.rank_order}</th>
+              <td>{row.configuration_name}</td>
             </tr>
           ))}
         </tbody>
