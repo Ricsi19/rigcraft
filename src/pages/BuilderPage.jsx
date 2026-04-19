@@ -25,6 +25,15 @@ export default function BuilderPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  function resetForm() {
+    setForm({ ...emptyForm, user_id: user?.id || null });
+    setFormError("");
+  }
+
+  function retryBuilderLoad() {
+    window.location.reload();
+  }
+
   useEffect(() => {
     let isMounted = true;
 
@@ -176,8 +185,7 @@ export default function BuilderPage() {
 
       const list = await configurationService.list();
       dispatch({ type: "SET_CONFIGURATIONS", payload: list });
-      setForm({ ...emptyForm, user_id: user?.id || null });
-      setFormError("");
+      resetForm();
     } catch (err) {
       setFormError(err.message || "A mentés sikertelen.");
       dispatch({ type: "SET_TOAST", payload: { type: "error", message: "A mentés sikertelen." } });
@@ -214,7 +222,7 @@ export default function BuilderPage() {
       dispatch({ type: "SET_CONFIGURATIONS", payload: list });
       dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Konfiguráció törölve." } });
       if (form.id === id) {
-        setForm({ ...emptyForm, user_id: user?.id || null });
+        resetForm();
       }
     } catch (err) {
       dispatch({ type: "SET_TOAST", payload: { type: "error", message: err.message || "Törlési hiba." } });
@@ -313,7 +321,7 @@ export default function BuilderPage() {
               {form.id ? "Frissítés" : "Létrehozás"}
             </button>
             {form.id ? (
-              <button type="button" className="btn btn-secondary" onClick={() => setForm(emptyForm)}>
+              <button type="button" className="btn btn-secondary" onClick={resetForm}>
                 Mégse
               </button>
             ) : null}
@@ -327,7 +335,7 @@ export default function BuilderPage() {
       <section aria-labelledby="saved-configs-heading">
         <h3 id="saved-configs-heading">Elmentett konfigurációk</h3>
         {isLoading ? <LoadingState text="Konfigurációk betöltése..." /> : null}
-        {!isLoading && error ? <ErrorState message={error} /> : null}
+        {!isLoading && error ? <ErrorState message={error} onRetry={retryBuilderLoad} /> : null}
         {!isLoading && !error && state.configurations.length === 0 ? (
           <EmptyState title="Nincs konfiguráció" text="Készítsd el az első konfigurációdat a fenti űrlappal." />
         ) : null}
@@ -336,7 +344,7 @@ export default function BuilderPage() {
             {state.configurations.map((config) => (
               <article key={config.id} className="card config-card">
                 <h3>{config.name}</h3>
-                <p className="muted">Cel: {config.goal}</p>
+                <p className="muted">Cél: {config.goal}</p>
                 <ul className="spec-list">
                   {config.items.map((item) => (
                     <li key={item.id}>
@@ -347,10 +355,10 @@ export default function BuilderPage() {
                 <p className="price-tag">{config.total_price_huf.toLocaleString("hu-HU")} Ft</p>
                 <div className="row gap-sm wrap">
                   <button type="button" className="btn btn-primary" onClick={() => handleEdit(config)}>
-                    Szerkesztes
+                    Szerkesztés
                   </button>
                   <button type="button" className="btn btn-secondary" onClick={() => handleDelete(config.id)}>
-                    Torles
+                    Törlés
                   </button>
                 </div>
               </article>

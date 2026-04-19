@@ -1,4 +1,4 @@
-export default function LoadingState({ text = "Betoltes folyamatban..." }) {
+export default function LoadingState({ text = "Betöltés folyamatban..." }) {
   return (
     <section className="card skeleton-wrapper" aria-live="polite" aria-busy="true">
       <div className="skeleton skeleton-line large"></div>

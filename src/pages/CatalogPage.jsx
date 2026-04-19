@@ -19,6 +19,10 @@ export default function CatalogPage() {
   const [error, setError] = useState("");
   const debouncedQuery = useDebouncedValue(query, 400);
 
+  function retryCatalogLoad() {
+    window.location.reload();
+  }
+
   useEffect(() => {
     const nextParams = new URLSearchParams();
     if (query) {
@@ -128,14 +132,14 @@ export default function CatalogPage() {
       </section>
 
       {isLoading ? <LoadingState text="Alkatrészek betöltése..." /> : null}
-      {!isLoading && error ? <ErrorState message={error} /> : null}
+      {!isLoading && error ? <ErrorState message={error} onRetry={retryCatalogLoad} /> : null}
 
       {!isLoading && !error && components.length === 0 ? (
         <EmptyState title="Nincs találat" text="Próbálj másik keresési kifejezést vagy kategóriát." />
       ) : null}
 
       {!isLoading && !error && components.length > 0 ? (
-        <section className="card-grid" aria-label="Talalati lista">
+        <section className="card-grid" aria-label="Találati lista">
           {components.map((item) => (
             <article key={item.id} className="card component-card">
               <h3>{item.name}</h3>

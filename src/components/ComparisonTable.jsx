@@ -14,6 +14,14 @@ function formatTopItems(items) {
 export default function ComparisonTable({ configurations }) {
   const columns = configurations || [];
 
+  if (columns.length === 0) {
+    return (
+      <div className="card table-wrap" role="region" aria-label="Konfigurációk összehasonlítása">
+        <p className="muted">Ehhez az összehasonlításhoz már nem érhetők el a konfigurációk.</p>
+      </div>
+    );
+  }
+
   const rows = [
     {
       label: "Cél",

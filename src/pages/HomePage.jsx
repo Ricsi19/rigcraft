@@ -41,6 +41,10 @@ export default function HomePage() {
     };
   }, []);
 
+  function retryLoadStats() {
+    window.location.reload();
+  }
+
   const cards = stats
     ? [
         { label: "Elérhető kategóriák", value: stats.categories },
@@ -81,7 +85,7 @@ export default function HomePage() {
       <section aria-labelledby="home-stats-heading">
         <h3 id="home-stats-heading">Gyors statisztikák</h3>
         {isLoading ? <LoadingState text="Statisztikák betöltése..." /> : null}
-        {!isLoading && error ? <ErrorState message={error} /> : null}
+        {!isLoading && error ? <ErrorState message={error} onRetry={retryLoadStats} /> : null}
         {!isLoading && !error ? (
           <div className="card-grid">
             {cards.map((item) => (

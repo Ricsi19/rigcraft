@@ -17,6 +17,10 @@ export default function ComparePage() {
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  function retryCompareLoad() {
+    window.location.reload();
+  }
+
   function toggleConfig(id) {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((value) => value !== id) : [...prev, id]
@@ -147,9 +151,14 @@ export default function ComparePage() {
       </section>
 
       {isLoading ? <LoadingState text="Összehasonlítások betöltése..." /> : null}
-      {!isLoading && error ? <ErrorState message={error} /> : null}
+      {!isLoading && error ? <ErrorState message={error} onRetry={retryCompareLoad} /> : null}
       {!isLoading && !error && comparisons.length === 0 ? (
-        <EmptyState title="Nincs összehasonlítás" text="Hozz létre konfigurációkat, majd mentsd el az összevetést." />
+        <EmptyState
+          title="Nincs összehasonlítás"
+          text="Hozz létre konfigurációkat, majd mentsd el az összevetést."
+          actionLabel="Oldal frissítése"
+          onAction={retryCompareLoad}
+        />
       ) : null}
 
       {!isLoading && !error && comparisons.length > 0 ? (

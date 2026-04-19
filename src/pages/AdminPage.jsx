@@ -30,6 +30,10 @@ export default function AdminPage() {
   const [categoryError, setCategoryError] = useState("");
   const [componentError, setComponentError] = useState("");
 
+  function retryAdminLoad() {
+    window.location.reload();
+  }
+
   useEffect(() => {
     let isMounted = true;
 
@@ -213,7 +217,7 @@ export default function AdminPage() {
       {role === "admin" ? (
         <>
           {isLoading ? <LoadingState text="Admin felület betöltése..." /> : null}
-          {!isLoading && error ? <ErrorState message={error} /> : null}
+          {!isLoading && error ? <ErrorState message={error} onRetry={retryAdminLoad} /> : null}
           {!isLoading && !error ? (
             <section className="stack" aria-label="Admin kezelőfelület">
               <article className="card">
@@ -411,7 +415,7 @@ export default function AdminPage() {
                           className="btn btn-secondary"
                           onClick={() => deleteComponent(component.id)}
                         >
-                          Torles
+                          Törlés
                         </button>
                       </div>
                     </div>
@@ -423,8 +427,8 @@ export default function AdminPage() {
         </>
       ) : (
         <EmptyState
-          title="Nincs jogosultsag"
-          text="Valts admin modra a jobb felso kapcsoloval az oldal elereshez."
+          title="Nincs jogosultság"
+          text="Ehhez az oldalhoz admin jogosultság szükséges. Jelentkezz be admin fiókkal."
         />
       )}
     </>
