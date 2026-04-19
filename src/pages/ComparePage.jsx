@@ -7,13 +7,6 @@ import PageHeader from "../components/PageHeader";
 import { comparisonService } from "../services/comparisonService";
 import { configurationService } from "../services/configurationService";
 
-function toRows(comparison) {
-  return comparison.items.map((item) => ({
-    rank_order: item.rank_order,
-    configuration_name: item.configuration_name
-  }));
-}
-
 export default function ComparePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -67,6 +60,8 @@ export default function ComparePage() {
       setIsSubmitting(false);
     }
   }
+
+  const configurationById = new Map(configurations.map((config) => [config.id, config]));
 
   useEffect(() => {
     let isMounted = true;
@@ -162,7 +157,11 @@ export default function ComparePage() {
           {comparisons.map((comparison) => (
             <article className="card" key={comparison.id}>
               <h3>{comparison.title}</h3>
-              <ComparisonTable rows={toRows(comparison)} />
+              <ComparisonTable
+                configurations={comparison.items
+                  .map((item) => configurationById.get(item.configuration_id))
+                  .filter(Boolean)}
+              />
             </article>
           ))}
         </section>
