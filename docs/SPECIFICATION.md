@@ -45,7 +45,7 @@ A projekt hangsulya a minosegi frontend megvalositason van: reszponziv felulet, 
 - Frontend: React + Vite + React Router.
 - Backend: FastAPI (Python) REST API.
 - Adatbazis: SQLAlchemy relacios modell (lokalisan SQLite, deployhoz PostgreSQL).
-- Auth terv: email/jelszo + token alapu autentikacio.
+- Auth: email/jelszo + backend session token alap.
 
 ### 3.2 UX es minosegi elvarasok
 
@@ -118,3 +118,39 @@ Navigacios logika:
 - Empty state: ures listakhoz kulon visszajelzes.
 - Toast: sikeres/sikertelen muveleti visszajelzes.
 - Debounce: katalogus keresomezo 400 ms debounce-al.
+
+## 7. Merfoldko 3 implementacios allapot
+
+### 7.1 Autentikacio
+
+- Regisztracio kliens es szerver oldali validacioval.
+- Bejelentkezes hibakezelessel.
+- Kijelentkezes (backend session revoke + kliens token torles).
+- Auth allapot perzisztencia localStorage tokennel.
+- Auth-fuggo UI (menu elemek, vedett oldalak elerhetosege, session info).
+
+### 7.2 Jogosultsagkezeles es vedelem
+
+- Route guard: `/builder`, `/compare`, `/admin` csak authentikalt usernek.
+- Role guard: `/admin` csak admin role eseten.
+- Backend oldali ellenorzes:
+	- Category es Component CRUD csak admin.
+	- Configuration update/delete csak tulajdonos vagy admin.
+	- Comparison lista csak sajat usernek.
+
+### 7.3 Input validacio es biztonsag
+
+- Kliens oldali form validacio (register/login/admin/builder).
+- Szerver oldali validacio Pydantic schema-kon es endpoint ellenorzeseken.
+- XSS vedelem: nincs nyers HTML rendereles (`dangerouslySetInnerHTML` nincs hasznalva).
+- Erzekeny adatok vedelme:
+	- jelszo hash backend oldalon,
+	- token only localStorage,
+	- API kulcs nincs kliensbe hardcodeolva,
+	- env es adatbazis fajlok `.gitignore` alatt.
+
+### 7.4 Teszteles
+
+- Unit tesztek: 17 db (validacio, state reducer, szamitas).
+- E2E teszt: 1 db Playwright happy path (regisztracio + vedett oldal eleres).
+- Futtatasi parancsok: `npm run test:unit`, `npm run test:e2e`.

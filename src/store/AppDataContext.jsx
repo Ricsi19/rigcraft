@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useReducer } from "react";
 
-const initialState = {
+export const initialState = {
   categories: [],
   components: [],
   configurations: [],
@@ -9,7 +9,7 @@ const initialState = {
   toast: null
 };
 
-function appDataReducer(state, action) {
+export function appDataReducer(state, action) {
   switch (action.type) {
     case "SET_LOADING":
       return { ...state, isLoading: action.payload };

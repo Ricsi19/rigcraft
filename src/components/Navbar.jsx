@@ -1,14 +1,20 @@
 import { NavLink } from "react-router-dom";
-
-const links = [
-  { to: "/", label: "Kezdolap" },
-  { to: "/catalog", label: "Alkatreszek" },
-  { to: "/builder", label: "Konfigurator" },
-  { to: "/compare", label: "Osszehasonlitas" },
-  { to: "/admin", label: "Admin" }
-];
+import { useAuth } from "../auth/AuthContext";
 
 export default function Navbar() {
+  const { isAuthenticated, user } = useAuth();
+  const isAdmin = user?.role_name === "admin";
+
+  const links = [
+    { to: "/", label: "Kezdolap" },
+    { to: "/catalog", label: "Alkatreszek" },
+    ...(isAuthenticated ? [{ to: "/builder", label: "Konfigurator" }] : []),
+    ...(isAuthenticated ? [{ to: "/compare", label: "Osszehasonlitas" }] : []),
+    ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
+    ...(!isAuthenticated ? [{ to: "/login", label: "Bejelentkezes" }] : []),
+    ...(!isAuthenticated ? [{ to: "/register", label: "Regisztracio" }] : [])
+  ];
+
   return (
     <nav className="main-nav" aria-label="Fo navigacio">
       <div className="container">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import ErrorState from "../components/feedback/ErrorState";
 import LoadingState from "../components/feedback/LoadingState";
 import PageHeader from "../components/PageHeader";
@@ -63,9 +64,9 @@ export default function HomePage() {
             Az oldal celja, hogy egyszeruen atlathato, jol hasznalhato feluleten valaszthasd ki
             az idealis komponenseket.
           </p>
-          <a className="btn btn-primary" href="/builder">
+          <Link className="btn btn-primary" to="/builder">
             Konfigurator megnyitasa
-          </a>
+          </Link>
         </article>
 
         <figure className="card hero-media" aria-label="Szerkesztoi gep kepes illusztracioja">

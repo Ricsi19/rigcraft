@@ -69,6 +69,15 @@
 - configuration_id: integer
 - rank_order: integer
 
+### 9. AuthSession
+
+- id: integer
+- user_id: integer
+- token_hash: string (unique)
+- expires_at: datetime
+- is_revoked: boolean
+- created_at: datetime
+
 ## 2. Kapcsolatok
 
 - Role 1:N User
@@ -94,6 +103,9 @@
 
 - Configuration 1:N ComparisonItem
 	Egy konfiguracio tobb osszehasonlitasban is szerepelhet.
+
+- User 1:N AuthSession
+	Egy felhasznalohoz tobb aktiv vagy visszavont session token tartozhat.
 
 ## 3. Relacios osszefoglalo
 

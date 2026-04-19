@@ -1,12 +1,14 @@
 import { Outlet } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 import Navbar from "../components/Navbar";
-import RoleSwitcher from "../components/RoleSwitcher";
 import SkipLink from "../components/SkipLink";
 import ToastMessage from "../components/feedback/ToastMessage";
 import { useAppData } from "../store/AppDataContext";
 
-export default function AppLayout({ role, onRoleChange }) {
+export default function AppLayout() {
   const { state, dispatch } = useAppData();
+  const { user, isAuthenticated, logout } = useAuth();
+  const role = user?.role_name || "visitor";
 
   return (
     <>
@@ -14,10 +16,22 @@ export default function AppLayout({ role, onRoleChange }) {
       <header className="top-shell">
         <div className="container row between center gap-md">
           <div>
-            <p className="eyebrow">Project Milestone 2</p>
+            <p className="eyebrow">Project Milestone 3</p>
             <h1 className="brand-title">RigCraft</h1>
           </div>
-          <RoleSwitcher role={role} onRoleChange={onRoleChange} />
+          <div className="row gap-sm center wrap">
+            <span className="chip-label">Szerepkor: {role}</span>
+            {isAuthenticated ? (
+              <>
+                <span className="chip-label">Belepve: {user.display_name}</span>
+                <button type="button" className="btn btn-secondary" onClick={logout}>
+                  Kijelentkezes
+                </button>
+              </>
+            ) : (
+              <span className="chip-label">Nincs bejelentkezve</span>
+            )}
+          </div>
         </div>
         <Navbar />
       </header>

@@ -272,6 +272,16 @@ select:focus-visible,
   color: #fff;
 }
 
+.chip-label {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #c7b694;
+  border-radius: 999px;
+  padding: var(--space-1) var(--space-3);
+  background: #fbf7eb;
+}
+
 .filter-panel h3 {
   margin-bottom: var(--space-3);
 }
@@ -412,6 +422,26 @@ td {
 
 .toast-error {
   border-left: 6px solid var(--color-danger);
+}
+
+.auth-page {
+  padding-block: var(--space-6);
+}
+
+.auth-card {
+  width: min(100%, 34rem);
+  margin-inline: auto;
+}
+
+.password-hints {
+  margin: 0;
+  padding-left: var(--space-4);
+  color: var(--color-muted);
+}
+
+.btn:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
 }
 
 .skeleton-wrapper {

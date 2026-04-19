@@ -4,9 +4,10 @@
 
 - App
 - AppLayout
+- AuthProvider
+- ProtectedRoute
 - SkipLink
 - Navbar
-- RoleSwitcher
 - PageHeader
 - HomePage
 - StatCard
@@ -16,6 +17,8 @@
 - ComparePage
 - ComparisonTable
 - AdminPage
+- LoginPage
+- RegisterPage
 - NotFoundPage
 - LoadingState
 - ErrorState
@@ -24,7 +27,9 @@
 ## 1.1 State es service reteg
 
 - AppDataProvider (Context + Reducer)
+- AuthContext (session state)
 - apiClient service
+- authService
 - categoryService
 - componentService
 - configurationService
@@ -71,6 +76,16 @@
 - LoadingState
 - ErrorState
 
+### Bejelentkezes (/login)
+
+- LoginPage
+- PageHeader
+
+### Regisztracio (/register)
+
+- RegisterPage
+- PageHeader
+
 ### 404 oldal (*)
 
 - AppLayout
@@ -78,8 +93,9 @@
 
 ## 3. Komponens-kommunikacio
 
-- Az App kezeli a globalis interakcios modot (visitor/member/admin).
-- Az AppLayout tovabbitja a szerepkort az Outlet contexten keresztul.
+- Az AuthProvider kezeli a bejelentkezett user es token allapotat.
+- A ProtectedRoute vegzi az auth es role alapu route vedelmet.
+- Az AppLayout auth allapottol fuggoen jelenit meg elemeket.
 - Az AppDataProvider kozponti allapotot ad a fo adatkollekciokhoz.
 - Az oldalak service retegen keresztul kommunikalnak a backenddel.
 - A katalogus oldalon a kereses/szures/rendezes URL query parameterekben is tukrozodik.

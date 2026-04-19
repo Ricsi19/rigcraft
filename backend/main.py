@@ -1,4 +1,7 @@
-from fastapi import Depends, FastAPI, HTTPException, Query, status
+from datetime import datetime
+import re
+
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import asc, desc, func, select
 from sqlalchemy.orm import Session, joinedload
@@ -6,6 +9,15 @@ from sqlalchemy.orm import Session, joinedload
 import models
 import schemas
 from database import SessionLocal, engine
+from security import (
+    generate_session_token,
+    hash_password,
+    hash_session_token,
+    session_expiry,
+    verify_password,
+)
+
+EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -28,6 +40,82 @@ def get_db():
         db.close()
 
 
+def parse_bearer_token(authorization: str | None) -> str:
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Missing authorization token")
+    prefix = "Bearer "
+    if not authorization.startswith(prefix):
+        raise HTTPException(status_code=401, detail="Invalid authorization header")
+    token = authorization[len(prefix) :].strip()
+    if not token:
+        raise HTTPException(status_code=401, detail="Empty token")
+    return token
+
+
+def get_current_user(
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> models.User:
+    token = parse_bearer_token(authorization)
+    token_hash = hash_session_token(token)
+
+    session = db.scalar(
+        select(models.AuthSession)
+        .where(models.AuthSession.token_hash == token_hash)
+        .where(models.AuthSession.revoked_at.is_(None))
+    )
+    if not session:
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
+
+    if session.expires_at <= datetime.utcnow():
+        session.revoked_at = datetime.utcnow()
+        db.commit()
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
+
+    user = db.scalar(
+        select(models.User)
+        .where(models.User.id == session.user_id)
+        .options(joinedload(models.User.role))
+    )
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    return user
+
+
+def require_admin(current_user: models.User = Depends(get_current_user)) -> models.User:
+    if not current_user.role or current_user.role.name != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+
+
+def get_current_session(
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> models.AuthSession:
+    token = parse_bearer_token(authorization)
+    token_hash = hash_session_token(token)
+    session = db.scalar(select(models.AuthSession).where(models.AuthSession.token_hash == token_hash))
+    if not session:
+        raise HTTPException(status_code=401, detail="Session not found")
+    return session
+
+
+def user_payload(user: models.User) -> schemas.UserRead:
+    return schemas.UserRead(
+        id=user.id,
+        email=user.email,
+        display_name=user.display_name,
+        role_id=user.role_id,
+        role_name=user.role.name if user.role else "member",
+    )
+
+
+def ensure_valid_email(email: str):
+    if not EMAIL_PATTERN.match(email):
+        raise HTTPException(status_code=400, detail="Invalid email format")
+
+
 def seed_if_needed(db: Session):
     role_count = db.scalar(select(func.count(models.Role.id)))
     if role_count and role_count > 0:
@@ -40,8 +128,18 @@ def seed_if_needed(db: Session):
     db.flush()
 
     users = [
-        models.User(email="admin@rigcraft.hu", password_hash="demo", display_name="Admin", role_id=admin_role.id),
-        models.User(email="richard@rigcraft.hu", password_hash="demo", display_name="Richard", role_id=member_role.id),
+        models.User(
+            email="admin@rigcraft.hu",
+            password_hash=hash_password("Admin123!"),
+            display_name="Admin",
+            role_id=admin_role.id,
+        ),
+        models.User(
+            email="richard@rigcraft.hu",
+            password_hash=hash_password("Richard123!"),
+            display_name="Richard",
+            role_id=member_role.id,
+        ),
     ]
     db.add_all(users)
     db.flush()
@@ -158,14 +256,110 @@ def health_check():
     return {"status": "ok"}
 
 
+@app.post("/auth/register", response_model=schemas.AuthTokenResponse, status_code=status.HTTP_201_CREATED)
+def register(payload: schemas.AuthRegisterRequest, db: Session = Depends(get_db)):
+    ensure_valid_email(payload.email.strip().lower())
+    existing = db.scalar(select(models.User).where(models.User.email == payload.email.strip().lower()))
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already in use")
+
+    has_upper = any(char.isupper() for char in payload.password)
+    has_digit = any(char.isdigit() for char in payload.password)
+    has_symbol = any(not char.isalnum() for char in payload.password)
+    if not (has_upper and has_digit and has_symbol):
+        raise HTTPException(
+            status_code=400,
+            detail="Password must contain uppercase letter, number and symbol",
+        )
+
+    member_role = db.scalar(select(models.Role).where(models.Role.name == "member"))
+    if not member_role:
+        raise HTTPException(status_code=500, detail="Role setup error")
+
+    user = models.User(
+        email=payload.email.strip().lower(),
+        password_hash=hash_password(payload.password),
+        display_name=payload.display_name.strip(),
+        role_id=member_role.id,
+    )
+    db.add(user)
+    db.flush()
+
+    plain_token = generate_session_token()
+    db.add(
+        models.AuthSession(
+            user_id=user.id,
+            token_hash=hash_session_token(plain_token),
+            expires_at=session_expiry(),
+        )
+    )
+    db.commit()
+
+    created_user = db.scalar(
+        select(models.User).where(models.User.id == user.id).options(joinedload(models.User.role))
+    )
+    if not created_user:
+        raise HTTPException(status_code=500, detail="User creation failed")
+
+    return schemas.AuthTokenResponse(token=plain_token, user=user_payload(created_user))
+
+
+@app.post("/auth/login", response_model=schemas.AuthTokenResponse)
+def login(payload: schemas.AuthLoginRequest, db: Session = Depends(get_db)):
+    ensure_valid_email(payload.email.strip().lower())
+    user = db.scalar(
+        select(models.User)
+        .where(models.User.email == payload.email.strip().lower())
+        .options(joinedload(models.User.role))
+    )
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if not verify_password(payload.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if not user.password_hash.startswith("$pbkdf2-sha256$"):
+        user.password_hash = hash_password(payload.password)
+        db.commit()
+        db.refresh(user)
+
+    plain_token = generate_session_token()
+    db.add(
+        models.AuthSession(
+            user_id=user.id,
+            token_hash=hash_session_token(plain_token),
+            expires_at=session_expiry(),
+        )
+    )
+    db.commit()
+
+    return schemas.AuthTokenResponse(token=plain_token, user=user_payload(user))
+
+
+@app.post("/auth/logout", response_model=schemas.MessageResponse)
+def logout(
+    session: models.AuthSession = Depends(get_current_session),
+    db: Session = Depends(get_db),
+):
+    session.revoked_at = datetime.utcnow()
+    db.commit()
+    return schemas.MessageResponse(message="Logged out")
+
+
+@app.get("/auth/me", response_model=schemas.UserRead)
+def auth_me(current_user: models.User = Depends(get_current_user)):
+    return user_payload(current_user)
+
+
 @app.get("/roles", response_model=list[schemas.RoleRead])
 def get_roles(db: Session = Depends(get_db)):
     return db.scalars(select(models.Role).order_by(models.Role.id)).all()
 
 
 @app.get("/users", response_model=list[schemas.UserRead])
-def get_users(db: Session = Depends(get_db)):
-    return db.scalars(select(models.User).order_by(models.User.id)).all()
+def get_users(db: Session = Depends(get_db), _: models.User = Depends(require_admin)):
+    users = db.scalars(select(models.User).options(joinedload(models.User.role)).order_by(models.User.id)).all()
+    return [user_payload(user) for user in users]
 
 
 @app.get("/stats", response_model=schemas.StatsRead)
@@ -184,7 +378,11 @@ def list_categories(db: Session = Depends(get_db)):
 
 
 @app.post("/categories", response_model=schemas.CategoryRead, status_code=status.HTTP_201_CREATED)
-def create_category(payload: schemas.CategoryCreate, db: Session = Depends(get_db)):
+def create_category(
+    payload: schemas.CategoryCreate,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
     category = models.Category(name=payload.name.strip(), slug=payload.slug.strip().lower())
     db.add(category)
     db.commit()
@@ -193,7 +391,12 @@ def create_category(payload: schemas.CategoryCreate, db: Session = Depends(get_d
 
 
 @app.put("/categories/{category_id}", response_model=schemas.CategoryRead)
-def update_category(category_id: int, payload: schemas.CategoryUpdate, db: Session = Depends(get_db)):
+def update_category(
+    category_id: int,
+    payload: schemas.CategoryUpdate,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
     category = db.get(models.Category, category_id)
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
@@ -206,7 +409,11 @@ def update_category(category_id: int, payload: schemas.CategoryUpdate, db: Sessi
 
 
 @app.delete("/categories/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_category(category_id: int, db: Session = Depends(get_db)):
+def delete_category(
+    category_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
     category = db.get(models.Category, category_id)
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
@@ -262,7 +469,11 @@ def list_components(
 
 
 @app.post("/components", response_model=schemas.ComponentRead, status_code=status.HTTP_201_CREATED)
-def create_component(payload: schemas.ComponentCreate, db: Session = Depends(get_db)):
+def create_component(
+    payload: schemas.ComponentCreate,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
     category = db.get(models.Category, payload.category_id)
     if not category:
         raise HTTPException(status_code=400, detail="Invalid category")
@@ -287,7 +498,12 @@ def create_component(payload: schemas.ComponentCreate, db: Session = Depends(get
 
 
 @app.put("/components/{component_id}", response_model=schemas.ComponentRead)
-def update_component(component_id: int, payload: schemas.ComponentUpdate, db: Session = Depends(get_db)):
+def update_component(
+    component_id: int,
+    payload: schemas.ComponentUpdate,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
     component = db.get(models.Component, component_id)
     if not component:
         raise HTTPException(status_code=404, detail="Component not found")
@@ -317,7 +533,11 @@ def update_component(component_id: int, payload: schemas.ComponentUpdate, db: Se
 
 
 @app.delete("/components/{component_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_component(component_id: int, db: Session = Depends(get_db)):
+def delete_component(
+    component_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
     component = db.get(models.Component, component_id)
     if not component:
         raise HTTPException(status_code=404, detail="Component not found")
@@ -358,9 +578,13 @@ def map_configuration(configuration: models.Configuration) -> schemas.Configurat
 
 
 @app.get("/configurations", response_model=list[schemas.ConfigurationRead])
-def list_configurations(db: Session = Depends(get_db)):
+def list_configurations(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     configs = db.scalars(
         select(models.Configuration)
+        .where((models.Configuration.is_public.is_(True)) | (models.Configuration.user_id == current_user.id))
         .options(
             joinedload(models.Configuration.user),
             joinedload(models.Configuration.items).joinedload(models.ConfigurationItem.component),
@@ -371,7 +595,14 @@ def list_configurations(db: Session = Depends(get_db)):
 
 
 @app.post("/configurations", response_model=schemas.ConfigurationRead, status_code=status.HTTP_201_CREATED)
-def create_configuration(payload: schemas.ConfigurationCreate, db: Session = Depends(get_db)):
+def create_configuration(
+    payload: schemas.ConfigurationCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    if current_user.role and current_user.role.name != "admin" and payload.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can only create your own configuration")
+
     user = db.get(models.User, payload.user_id)
     if not user:
         raise HTTPException(status_code=400, detail="Invalid user")
@@ -416,10 +647,19 @@ def create_configuration(payload: schemas.ConfigurationCreate, db: Session = Dep
 
 
 @app.put("/configurations/{configuration_id}", response_model=schemas.ConfigurationRead)
-def update_configuration(configuration_id: int, payload: schemas.ConfigurationUpdate, db: Session = Depends(get_db)):
+def update_configuration(
+    configuration_id: int,
+    payload: schemas.ConfigurationUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     config = db.get(models.Configuration, configuration_id)
     if not config:
         raise HTTPException(status_code=404, detail="Configuration not found")
+
+    is_admin = current_user.role and current_user.role.name == "admin"
+    if not is_admin and config.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can only edit your own configuration")
 
     user = db.get(models.User, payload.user_id)
     if not user:
@@ -467,10 +707,18 @@ def update_configuration(configuration_id: int, payload: schemas.ConfigurationUp
 
 
 @app.delete("/configurations/{configuration_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_configuration(configuration_id: int, db: Session = Depends(get_db)):
+def delete_configuration(
+    configuration_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     config = db.get(models.Configuration, configuration_id)
     if not config:
         raise HTTPException(status_code=404, detail="Configuration not found")
+
+    is_admin = current_user.role and current_user.role.name == "admin"
+    if not is_admin and config.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can only delete your own configuration")
 
     db.delete(config)
     db.commit()
@@ -478,9 +726,13 @@ def delete_configuration(configuration_id: int, db: Session = Depends(get_db)):
 
 
 @app.get("/comparisons", response_model=list[schemas.ComparisonRead])
-def list_comparisons(db: Session = Depends(get_db)):
+def list_comparisons(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     comps = db.scalars(
         select(models.Comparison)
+        .where(models.Comparison.user_id == current_user.id)
         .options(
             joinedload(models.Comparison.items)
             .joinedload(models.ComparisonItem.configuration),

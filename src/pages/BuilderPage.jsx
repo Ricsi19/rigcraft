@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../auth/AuthContext";
 import EmptyState from "../components/EmptyState";
 import ErrorState from "../components/feedback/ErrorState";
 import LoadingState from "../components/feedback/LoadingState";
@@ -9,7 +10,7 @@ import { useAppData } from "../store/AppDataContext";
 
 const emptyForm = {
   id: null,
-  user_id: 2,
+  user_id: null,
   name: "",
   goal: "",
   is_public: false,
@@ -18,6 +19,7 @@ const emptyForm = {
 
 export default function BuilderPage() {
   const { state, dispatch } = useAppData();
+  const { user } = useAuth();
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -61,6 +63,13 @@ export default function BuilderPage() {
   const componentMap = useMemo(() => {
     return new Map(state.components.map((item) => [item.id, item]));
   }, [state.components]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+    setForm((prev) => ({ ...prev, user_id: user.id }));
+  }, [user]);
 
   const derivedTotal = useMemo(() => {
     return form.items.reduce((sum, item) => {
@@ -113,6 +122,9 @@ export default function BuilderPage() {
     if (form.goal.trim().length < 2) {
       return "A konfiguracio celja kotelezo.";
     }
+    if (!form.user_id) {
+      return "Bejelentkezett felhasznalo hianyzik.";
+    }
     if (form.items.length === 0) {
       return "Legalabb 1 tetel kotelezo.";
     }
@@ -164,7 +176,7 @@ export default function BuilderPage() {
 
       const list = await configurationService.list();
       dispatch({ type: "SET_CONFIGURATIONS", payload: list });
-      setForm(emptyForm);
+      setForm({ ...emptyForm, user_id: user?.id || null });
       setFormError("");
     } catch (err) {
       setFormError(err.message || "A mentes sikertelen.");
@@ -202,7 +214,7 @@ export default function BuilderPage() {
       dispatch({ type: "SET_CONFIGURATIONS", payload: list });
       dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Konfiguracio torolve." } });
       if (form.id === id) {
-        setForm(emptyForm);
+        setForm({ ...emptyForm, user_id: user?.id || null });
       }
     } catch (err) {
       dispatch({ type: "SET_TOAST", payload: { type: "error", message: err.message || "Torlesi hiba." } });
@@ -239,13 +251,8 @@ export default function BuilderPage() {
               />
             </label>
             <label>
-              <span>Tulajdonos ID</span>
-              <input
-                type="number"
-                min="1"
-                value={form.user_id}
-                onChange={(event) => updateField("user_id", event.target.value)}
-              />
+              <span>Tulajdonos</span>
+              <input type="text" value={user?.display_name || "-"} disabled readOnly />
             </label>
           </div>
 

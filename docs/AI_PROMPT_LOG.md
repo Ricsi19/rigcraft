@@ -78,3 +78,35 @@ Az adatmodell dokumentacio kezdetben UUID tipust tartalmazott, mikozben a tenyle
 
 - Az adatmodell dokumentaciot frissitettem integer ID-kre.
 - Hozzaadtam megvalositasi megjegyzest a SQLite fejlesztesi fallback + PostgreSQL deploy modellrol.
+
+## 2026-04-19 - Merfoldko 3 autentikacio es jogosultsagkezeles
+
+### Prompt
+
+"Valositsd meg a teljes 3. merfoldkot: auth (register/login/logout), route guard, role guard, backend oldali jogosultsag, tesztek es deploy dokumentacio."
+
+### AI valasz lenyege
+
+- FastAPI auth endpointok session token alapon
+- Frontend AuthContext + ProtectedRoute
+- Admin es tulajdonosi backend-side jogosultsag ellenorzes
+- Unit tesztek + Playwright E2E
+- Részletes deploy leiras (Render + Neon + Vercel)
+
+### Ertekeles
+
+- Elfogadva: igen
+- Modositva: igen
+- Miert: a jelszo hash megoldast bcrypt-rol pbkdf2-re csereltem kompatibilitasi hiba miatt.
+
+## 2026-04-19 - AI korlat es kezeles
+
+### Problema
+
+Az AI altal javasolt bcrypt backend a helyi Python kornyezetben futasi hibat adott.
+
+### Kezeles
+
+- A hash algoritmust pbkdf2_sha256-ra allitottam at.
+- Hozzaadtam legacy jelszo kompatibilitasi agat a korabbi seed adatok miatt.
+- Ujrafuttattam a unit es E2E teszteket a javitas utan.

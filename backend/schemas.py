@@ -3,6 +3,17 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
+class AuthRegisterRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=120)
+    display_name: str = Field(min_length=2, max_length=80)
+    password: str = Field(min_length=8, max_length=128)
+
+
+class AuthLoginRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=120)
+    password: str = Field(min_length=8, max_length=128)
+
+
 class RoleRead(BaseModel):
     id: int
     name: str
@@ -16,8 +27,14 @@ class UserRead(BaseModel):
     email: str
     display_name: str
     role_id: int
+    role_name: str
 
     model_config = {"from_attributes": True}
+
+
+class AuthTokenResponse(BaseModel):
+    token: str
+    user: UserRead
 
 
 class CategoryBase(BaseModel):
@@ -127,3 +144,7 @@ class StatsRead(BaseModel):
     components: int
     configurations: int
     comparisons: int
+
+
+class MessageResponse(BaseModel):
+    message: str
