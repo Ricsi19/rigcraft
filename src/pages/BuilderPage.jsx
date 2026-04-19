@@ -20,6 +20,7 @@ const emptyForm = {
 export default function BuilderPage() {
   const { state, dispatch } = useAppData();
   const { user } = useAuth();
+  const isAdmin = user?.role_name === "admin";
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -193,6 +194,15 @@ export default function BuilderPage() {
   }
 
   function handleEdit(configuration) {
+    const canManage = isAdmin || configuration.user_id === user?.id;
+    if (!canManage) {
+      dispatch({
+        type: "SET_TOAST",
+        payload: { type: "error", message: "Ezt a konfigurációt nem szerkesztheted." }
+      });
+      return;
+    }
+
     setForm({
       id: configuration.id,
       user_id: configuration.user_id,
@@ -212,6 +222,16 @@ export default function BuilderPage() {
   }
 
   async function handleDelete(id) {
+    const target = state.configurations.find((config) => config.id === id);
+    const canManage = isAdmin || target?.user_id === user?.id;
+    if (!canManage) {
+      dispatch({
+        type: "SET_TOAST",
+        payload: { type: "error", message: "Ezt a konfigurációt nem törölheted." }
+      });
+      return;
+    }
+
     const confirmed = window.confirm("Biztosan törlöd ezt a konfigurációt?");
     if (!confirmed) {
       return;
@@ -345,6 +365,8 @@ export default function BuilderPage() {
               <article key={config.id} className="card config-card">
                 <h3>{config.name}</h3>
                 <p className="muted">Cél: {config.goal}</p>
+                <p className="muted">Tulajdonos: {config.user_name}</p>
+                <p className="muted">Láthatóság: {config.is_public ? "Nyilvános" : "Privát"}</p>
                 <ul className="spec-list">
                   {config.items.map((item) => (
                     <li key={item.id}>
@@ -354,12 +376,18 @@ export default function BuilderPage() {
                 </ul>
                 <p className="price-tag">{config.total_price_huf.toLocaleString("hu-HU")} Ft</p>
                 <div className="row gap-sm wrap">
-                  <button type="button" className="btn btn-primary" onClick={() => handleEdit(config)}>
-                    Szerkesztés
-                  </button>
-                  <button type="button" className="btn btn-secondary" onClick={() => handleDelete(config.id)}>
-                    Törlés
-                  </button>
+                  {isAdmin || config.user_id === user?.id ? (
+                    <>
+                      <button type="button" className="btn btn-primary" onClick={() => handleEdit(config)}>
+                        Szerkesztés
+                      </button>
+                      <button type="button" className="btn btn-secondary" onClick={() => handleDelete(config.id)}>
+                        Törlés
+                      </button>
+                    </>
+                  ) : (
+                    <p className="muted">Csak megtekinthető konfiguráció</p>
+                  )}
                 </div>
               </article>
             ))}

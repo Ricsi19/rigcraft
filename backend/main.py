@@ -569,6 +569,9 @@ def map_configuration(configuration: models.Configuration) -> schemas.Configurat
                 id=item.id,
                 component_id=item.component_id,
                 component_name=item.component.name if item.component else "Unknown",
+                component_category_name=item.component.category.name if item.component and item.component.category else None,
+                component_price_huf=item.component.price_huf if item.component else None,
+                component_watt_usage=item.component.watt_usage if item.component else None,
                 quantity=item.quantity,
                 note=item.note,
             )
@@ -587,7 +590,9 @@ def list_configurations(
         .where((models.Configuration.is_public.is_(True)) | (models.Configuration.user_id == current_user.id))
         .options(
             joinedload(models.Configuration.user),
-            joinedload(models.Configuration.items).joinedload(models.ConfigurationItem.component),
+            joinedload(models.Configuration.items)
+            .joinedload(models.ConfigurationItem.component)
+            .joinedload(models.Component.category),
         )
         .order_by(desc(models.Configuration.updated_at))
     ).unique().all()
@@ -638,7 +643,9 @@ def create_configuration(
         .where(models.Configuration.id == config.id)
         .options(
             joinedload(models.Configuration.user),
-            joinedload(models.Configuration.items).joinedload(models.ConfigurationItem.component),
+            joinedload(models.Configuration.items)
+            .joinedload(models.ConfigurationItem.component)
+            .joinedload(models.Component.category),
         )
     )
     if not created:
@@ -698,7 +705,9 @@ def update_configuration(
         .where(models.Configuration.id == config.id)
         .options(
             joinedload(models.Configuration.user),
-            joinedload(models.Configuration.items).joinedload(models.ConfigurationItem.component),
+            joinedload(models.Configuration.items)
+            .joinedload(models.ConfigurationItem.component)
+            .joinedload(models.Component.category),
         )
     )
     if not updated:

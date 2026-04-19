@@ -107,6 +107,9 @@ class ConfigurationItemRead(BaseModel):
     id: int
     component_id: int
     component_name: str
+    component_category_name: str | None = None
+    component_price_huf: int | None = None
+    component_watt_usage: int | None = None
     quantity: int
     note: str | None
 
