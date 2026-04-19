@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import Navbar from "../components/Navbar";
 import SkipLink from "../components/SkipLink";
@@ -8,7 +8,18 @@ import { useAppData } from "../store/AppDataContext";
 export default function AppLayout() {
   const { state, dispatch } = useAppData();
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const role = user?.role_name || "visitor";
+  const roleLabel = {
+    visitor: "Vendég",
+    member: "Felhasználó",
+    admin: "Admin"
+  }[role] || "Vendég";
+
+  async function handleLogout() {
+    await logout();
+    navigate("/");
+  }
 
   return (
     <>
@@ -16,16 +27,16 @@ export default function AppLayout() {
       <header className="top-shell">
         <div className="container row between center gap-md">
           <div>
-            <p className="eyebrow">Project Milestone 3</p>
+            <p className="eyebrow">PC konfigurátor és összehasonlító</p>
             <h1 className="brand-title">RigCraft</h1>
           </div>
           <div className="row gap-sm center wrap">
-            <span className="chip-label">Szerepkor: {role}</span>
+            <span className="chip-label">Szerepkör: {roleLabel}</span>
             {isAuthenticated ? (
               <>
-                <span className="chip-label">Belepve: {user.display_name}</span>
-                <button type="button" className="btn btn-secondary" onClick={logout}>
-                  Kijelentkezes
+                <span className="chip-label">Belépve: {user.display_name}</span>
+                <button type="button" className="btn btn-secondary" onClick={handleLogout}>
+                  Kijelentkezés
                 </button>
               </>
             ) : (
@@ -42,8 +53,8 @@ export default function AppLayout() {
 
       <footer className="site-footer">
         <div className="container row between center gap-sm wrap">
-          <p>RigCraft - Szamitogep konfiguracio osszeallito es osszehasonlito</p>
-          <p>Backend-integralt frontend</p>
+          <p>RigCraft - Számítógép konfiguráció összeállító és összehasonlító</p>
+          <p>Tervezd meg az ideális gépedet egyszerűen.</p>
         </div>
       </footer>
 

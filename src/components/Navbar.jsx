@@ -6,17 +6,17 @@ export default function Navbar() {
   const isAdmin = user?.role_name === "admin";
 
   const links = [
-    { to: "/", label: "Kezdolap" },
-    { to: "/catalog", label: "Alkatreszek" },
-    ...(isAuthenticated ? [{ to: "/builder", label: "Konfigurator" }] : []),
-    ...(isAuthenticated ? [{ to: "/compare", label: "Osszehasonlitas" }] : []),
+    { to: "/", label: "Kezdőlap" },
+    { to: "/catalog", label: "Alkatrészek" },
+    ...(isAuthenticated ? [{ to: "/builder", label: "Konfigurátor" }] : []),
+    ...(isAuthenticated ? [{ to: "/compare", label: "Összehasonlítás" }] : []),
     ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
-    ...(!isAuthenticated ? [{ to: "/login", label: "Bejelentkezes" }] : []),
-    ...(!isAuthenticated ? [{ to: "/register", label: "Regisztracio" }] : [])
+    ...(!isAuthenticated ? [{ to: "/login", label: "Bejelentkezés" }] : []),
+    ...(!isAuthenticated ? [{ to: "/register", label: "Regisztráció" }] : [])
   ];
 
   return (
-    <nav className="main-nav" aria-label="Fo navigacio">
+    <nav className="main-nav" aria-label="Fő navigáció">
       <div className="container">
         <ul className="nav-list">
           {links.map((item) => (

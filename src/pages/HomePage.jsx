@@ -27,7 +27,7 @@ export default function HomePage() {
         if (!isMounted) {
           return;
         }
-        setError(err.message || "A statisztikak betoltese sikertelen.");
+        setError(err.message || "A statisztikák betöltése sikertelen.");
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -43,44 +43,44 @@ export default function HomePage() {
 
   const cards = stats
     ? [
-        { label: "Elerheto kategoriak", value: stats.categories },
-        { label: "Elerheto alkatreszek", value: stats.components },
-        { label: "Elmentett konfiguraciok", value: stats.configurations },
-        { label: "Aktiv osszehasonlitasok", value: stats.comparisons }
+        { label: "Elérhető kategóriák", value: stats.categories },
+        { label: "Elérhető alkatrészek", value: stats.components },
+        { label: "Elmentett konfigurációk", value: stats.configurations },
+        { label: "Aktív összehasonlítások", value: stats.comparisons }
       ]
     : [];
 
   return (
     <>
       <PageHeader
-        title="RigCraft kezdooldal"
-        subtitle="Epitsd ossze a gepeidet, hasonlitsd ossze teljesitmeny alapjan, es valassz tudatosan."
+        title="RigCraft kezdőlap"
+        subtitle="Állítsd össze a gépedet, hasonlítsd össze a lehetőségeket, és válassz tudatosan."
       />
 
       <section className="hero card-grid">
         <article className="card hero-copy">
-          <h3>Gyors konfiguracio tervezes</h3>
+          <h3>Gyors konfigurációtervezés</h3>
           <p>
-            Az oldal celja, hogy egyszeruen atlathato, jol hasznalhato feluleten valaszthasd ki
-            az idealis komponenseket.
+            Egyszerű, átlátható felületen válogathatsz az alkatrészek között, és pár perc alatt
+            elkészítheted a saját összeállításodat.
           </p>
           <Link className="btn btn-primary" to="/builder">
-            Konfigurator megnyitasa
+            Konfigurátor megnyitása
           </Link>
         </article>
 
-        <figure className="card hero-media" aria-label="Szerkesztoi gep kepes illusztracioja">
+        <figure className="card hero-media" aria-label="Asztali gép illusztráció">
           <img
             src="https://media.sketchfab.com/models/bd6fb0ed93f3475b890a099fedecf351/thumbnails/044fa172a0a943d1ac28d63d8d79ef7f/3dcd32444a674e1f9f4dac575cf73357.jpeg"
-            alt="Asztali PC komponensek felulnezetbol"
+            alt="Asztali PC komponensek felülnézetből"
             loading="lazy"
           />
         </figure>
       </section>
 
       <section aria-labelledby="home-stats-heading">
-        <h3 id="home-stats-heading">Gyors statisztikak</h3>
-        {isLoading ? <LoadingState text="Statisztikak betoltese..." /> : null}
+        <h3 id="home-stats-heading">Gyors statisztikák</h3>
+        {isLoading ? <LoadingState text="Statisztikák betöltése..." /> : null}
         {!isLoading && error ? <ErrorState message={error} /> : null}
         {!isLoading && !error ? (
           <div className="card-grid">

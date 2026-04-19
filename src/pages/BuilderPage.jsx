@@ -46,7 +46,7 @@ export default function BuilderPage() {
         if (!isMounted) {
           return;
         }
-        setError(err.message || "A konfiguraciok betoltese sikertelen.");
+        setError(err.message || "A konfigurációk betöltése sikertelen.");
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -117,23 +117,23 @@ export default function BuilderPage() {
 
   function validate() {
     if (form.name.trim().length < 2) {
-      return "A konfiguracio neve legalabb 2 karakter legyen.";
+      return "A konfiguráció neve legalább 2 karakter legyen.";
     }
     if (form.goal.trim().length < 2) {
-      return "A konfiguracio celja kotelezo.";
+      return "A konfiguráció célja kötelező.";
     }
     if (!form.user_id) {
-      return "Bejelentkezett felhasznalo hianyzik.";
+      return "Bejelentkezett felhasználó hiányzik.";
     }
     if (form.items.length === 0) {
-      return "Legalabb 1 tetel kotelezo.";
+      return "Legalább 1 tétel kötelező.";
     }
     for (const item of form.items) {
       if (!item.component_id) {
-        return "Minden sorban valassz komponenst.";
+        return "Minden sorban válassz komponenst.";
       }
       if (Number(item.quantity) < 1) {
-        return "A mennyiseg legalabb 1 legyen.";
+        return "A mennyiség legalább 1 legyen.";
       }
     }
     return "";
@@ -164,13 +164,13 @@ export default function BuilderPage() {
         await configurationService.update(form.id, payload);
         dispatch({
           type: "SET_TOAST",
-          payload: { type: "success", message: "Konfiguracio frissitve." }
+          payload: { type: "success", message: "Konfiguráció frissítve." }
         });
       } else {
         await configurationService.create(payload);
         dispatch({
           type: "SET_TOAST",
-          payload: { type: "success", message: "Konfiguracio letrehozva." }
+          payload: { type: "success", message: "Konfiguráció létrehozva." }
         });
       }
 
@@ -179,8 +179,8 @@ export default function BuilderPage() {
       setForm({ ...emptyForm, user_id: user?.id || null });
       setFormError("");
     } catch (err) {
-      setFormError(err.message || "A mentes sikertelen.");
-      dispatch({ type: "SET_TOAST", payload: { type: "error", message: "A mentes sikertelen." } });
+      setFormError(err.message || "A mentés sikertelen.");
+      dispatch({ type: "SET_TOAST", payload: { type: "error", message: "A mentés sikertelen." } });
     }
   }
 
@@ -204,7 +204,7 @@ export default function BuilderPage() {
   }
 
   async function handleDelete(id) {
-    const confirmed = window.confirm("Biztosan torlod ezt a konfiguraciot?");
+    const confirmed = window.confirm("Biztosan törlöd ezt a konfigurációt?");
     if (!confirmed) {
       return;
     }
@@ -212,28 +212,28 @@ export default function BuilderPage() {
       await configurationService.remove(id);
       const list = await configurationService.list();
       dispatch({ type: "SET_CONFIGURATIONS", payload: list });
-      dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Konfiguracio torolve." } });
+      dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Konfiguráció törölve." } });
       if (form.id === id) {
         setForm({ ...emptyForm, user_id: user?.id || null });
       }
     } catch (err) {
-      dispatch({ type: "SET_TOAST", payload: { type: "error", message: err.message || "Torlesi hiba." } });
+      dispatch({ type: "SET_TOAST", payload: { type: "error", message: err.message || "Törlési hiba." } });
     }
   }
 
   return (
     <>
       <PageHeader
-        title="Konfigurator"
-        subtitle="Sajat konfiguraciok letrehozasa, szerkesztese es torlese valodi backend integracioval."
+        title="Konfigurátor"
+        subtitle="Állítsd össze a saját gépedet, és mentsd el a konfigurációidat későbbre."
       />
 
       <section className="card" aria-labelledby="builder-form-heading">
-        <h3 id="builder-form-heading">Konfiguracio editor</h3>
+        <h3 id="builder-form-heading">Konfiguráció szerkesztése</h3>
         <form className="stack" onSubmit={handleSubmit}>
           <div className="filter-grid">
             <label>
-              <span>Konfiguracio neve</span>
+              <span>Konfiguráció neve</span>
               <input
                 type="text"
                 value={form.name}
@@ -242,7 +242,7 @@ export default function BuilderPage() {
               />
             </label>
             <label>
-              <span>Cel</span>
+              <span>Cél</span>
               <input
                 type="text"
                 value={form.goal}
@@ -262,11 +262,11 @@ export default function BuilderPage() {
               checked={form.is_public}
               onChange={(event) => updateField("is_public", event.target.checked)}
             />
-            <span>Publikus konfiguracio</span>
+            <span>Nyilvános konfiguráció</span>
           </label>
 
           <div className="stack">
-            <p className="muted">Tetelek</p>
+            <p className="muted">Tételek</p>
             {form.items.map((item, index) => (
               <div className="line-item-row" key={`config-item-${index}`}>
                 <select
@@ -274,7 +274,7 @@ export default function BuilderPage() {
                   onChange={(event) => updateItem(index, "component_id", event.target.value)}
                   required
                 >
-                  <option value="">Valassz komponenst</option>
+                  <option value="">Válassz komponenst</option>
                   {state.components.map((component) => (
                     <option key={component.id} value={component.id}>
                       {component.name} - {component.price_huf.toLocaleString("hu-HU")} Ft
@@ -289,7 +289,7 @@ export default function BuilderPage() {
                 />
                 <input
                   type="text"
-                  placeholder="Megjegyzes"
+                  placeholder="Megjegyzés"
                   value={item.note}
                   onChange={(event) => updateItem(index, "note", event.target.value)}
                 />
@@ -297,9 +297,9 @@ export default function BuilderPage() {
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => removeItemRow(index)}
-                  aria-label="Tetel torlese"
+                  aria-label="Tétel törlése"
                 >
-                  Torol
+                  Töröl
                 </button>
               </div>
             ))}
@@ -307,32 +307,32 @@ export default function BuilderPage() {
 
           <div className="row gap-sm wrap">
             <button type="button" className="btn btn-secondary" onClick={addItemRow}>
-              Uj tetel sor
+              Új tétel
             </button>
             <button type="submit" className="btn btn-primary">
-              {form.id ? "Frissites" : "Letrehozas"}
+              {form.id ? "Frissítés" : "Létrehozás"}
             </button>
             {form.id ? (
               <button type="button" className="btn btn-secondary" onClick={() => setForm(emptyForm)}>
-                Megse
+                Mégse
               </button>
             ) : null}
           </div>
 
-          <p className="price-tag">Szamitott osszar: {derivedTotal.toLocaleString("hu-HU")} Ft</p>
+          <p className="price-tag">Számított összár: {derivedTotal.toLocaleString("hu-HU")} Ft</p>
           {formError ? <p className="field-error">{formError}</p> : null}
         </form>
       </section>
 
       <section aria-labelledby="saved-configs-heading">
-        <h3 id="saved-configs-heading">Elmentett konfiguraciok</h3>
-        {isLoading ? <LoadingState text="Konfiguraciok betoltese..." /> : null}
+        <h3 id="saved-configs-heading">Elmentett konfigurációk</h3>
+        {isLoading ? <LoadingState text="Konfigurációk betöltése..." /> : null}
         {!isLoading && error ? <ErrorState message={error} /> : null}
         {!isLoading && !error && state.configurations.length === 0 ? (
-          <EmptyState title="Nincs konfiguracio" text="Keszitsd el az elso konfiguraciodat a fenti urlappal." />
+          <EmptyState title="Nincs konfiguráció" text="Készítsd el az első konfigurációdat a fenti űrlappal." />
         ) : null}
         {!isLoading && !error && state.configurations.length > 0 ? (
-          <div className="card-grid" aria-label="Mentett konfiguraciok listaja">
+          <div className="card-grid" aria-label="Mentett konfigurációk listája">
             {state.configurations.map((config) => (
               <article key={config.id} className="card config-card">
                 <h3>{config.name}</h3>

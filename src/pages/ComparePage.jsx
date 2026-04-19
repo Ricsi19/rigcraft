@@ -35,7 +35,7 @@ export default function ComparePage() {
         if (!isMounted) {
           return;
         }
-        setError(err.message || "Osszehasonlitasok betoltese sikertelen.");
+        setError(err.message || "Az összehasonlítások betöltése sikertelen.");
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -52,18 +52,18 @@ export default function ComparePage() {
   return (
     <>
       <PageHeader
-        title="Konfiguracio osszehasonlitas"
-        subtitle="Teljesitmeny, ar es fogyasztas alapjan hasonlitsd ossze az osszeallitasokat."
+        title="Konfiguráció összehasonlítás"
+        subtitle="Nézd meg egymás mellett az összeállítások árát és főbb jellemzőit."
       />
 
-      {isLoading ? <LoadingState text="Osszehasonlitasok betoltese..." /> : null}
+      {isLoading ? <LoadingState text="Összehasonlítások betöltése..." /> : null}
       {!isLoading && error ? <ErrorState message={error} /> : null}
       {!isLoading && !error && comparisons.length === 0 ? (
-        <EmptyState title="Nincs osszehasonlitas" text="Hozz letre konfiguraciokat, majd ments osszehasonlitast." />
+        <EmptyState title="Nincs összehasonlítás" text="Hozz létre konfigurációkat, majd mentsd el az összevetést." />
       ) : null}
 
       {!isLoading && !error && comparisons.length > 0 ? (
-        <section className="stack" aria-label="Mentett osszehasonlitasok">
+        <section className="stack" aria-label="Mentett összehasonlítások">
           {comparisons.map((comparison) => (
             <article className="card" key={comparison.id}>
               <h3>{comparison.title}</h3>

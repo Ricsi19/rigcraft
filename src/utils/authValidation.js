@@ -7,16 +7,16 @@ export function getPasswordErrors(password) {
   const value = password || "";
   const errors = [];
   if (value.length < 8) {
-    errors.push("A jelszo legalabb 8 karakter legyen.");
+    errors.push("A jelszó legalább 8 karakter legyen.");
   }
   if (!/[A-Z]/.test(value)) {
-    errors.push("A jelszo tartalmazzon legalabb egy nagybetut.");
+    errors.push("A jelszó tartalmazzon legalább egy nagybetűt.");
   }
   if (!/[0-9]/.test(value)) {
-    errors.push("A jelszo tartalmazzon legalabb egy szamot.");
+    errors.push("A jelszó tartalmazzon legalább egy számot.");
   }
   if (!/[^A-Za-z0-9]/.test(value)) {
-    errors.push("A jelszo tartalmazzon legalabb egy specialis karaktert.");
+    errors.push("A jelszó tartalmazzon legalább egy speciális karaktert.");
   }
   return errors;
 }
@@ -24,10 +24,10 @@ export function getPasswordErrors(password) {
 export function validateRegisterForm({ email, displayName, password }) {
   const errors = {};
   if (!isValidEmail(email)) {
-    errors.email = "Adj meg ervenyes email cimet.";
+    errors.email = "Adj meg érvényes e-mail címet.";
   }
   if (!displayName || displayName.trim().length < 2) {
-    errors.displayName = "A nev legalabb 2 karakter legyen.";
+    errors.displayName = "A név legalább 2 karakter legyen.";
   }
   const passwordErrors = getPasswordErrors(password);
   if (passwordErrors.length > 0) {
@@ -39,10 +39,10 @@ export function validateRegisterForm({ email, displayName, password }) {
 export function validateLoginForm({ email, password }) {
   const errors = {};
   if (!isValidEmail(email)) {
-    errors.email = "Adj meg ervenyes email cimet.";
+    errors.email = "Adj meg érvényes e-mail címet.";
   }
   if (!password || password.length < 8) {
-    errors.password = "A jelszo legalabb 8 karakter legyen.";
+    errors.password = "A jelszó legalább 8 karakter legyen.";
   }
   return errors;
 }

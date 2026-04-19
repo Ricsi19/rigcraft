@@ -1,10 +1,10 @@
 export default function ComparisonTable({ rows }) {
   return (
-    <div className="card table-wrap" role="region" aria-label="Konfiguraciok osszehasonlitasa">
+    <div className="card table-wrap" role="region" aria-label="Konfigurációk összehasonlítása">
       <table>
         <thead>
           <tr>
-            <th scope="col">Jellemzo</th>
+            <th scope="col">Jellemző</th>
             <th scope="col">Esport Build</th>
             <th scope="col">Creator Build</th>
             <th scope="col">Budget Build</th>

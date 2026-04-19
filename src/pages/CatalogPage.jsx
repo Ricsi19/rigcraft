@@ -53,7 +53,7 @@ export default function CatalogPage() {
         if (!isMounted) {
           return;
         }
-        setError(err.message || "A katalogus betoltese sikertelen.");
+        setError(err.message || "A katalógus betöltése sikertelen.");
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -87,15 +87,15 @@ export default function CatalogPage() {
   return (
     <>
       <PageHeader
-        title="Alkatresz katalogus"
-        subtitle="Kereses, szures es rendezes egy helyen - alapja a kesobbi teljes CRUD modulnak."
+        title="Alkatrész katalógus"
+        subtitle="Keresd meg gyorsan a számodra ideális komponenseket szűréssel és rendezéssel."
       />
 
       <section className="card filter-panel" aria-labelledby="catalog-filter-heading">
-        <h3 id="catalog-filter-heading">Szurok</h3>
+        <h3 id="catalog-filter-heading">Szűrők</h3>
         <div className="filter-grid">
           <label>
-            <span>Kereses</span>
+            <span>Keresés</span>
             <input
               type="search"
               placeholder="Pl. RTX, Ryzen"
@@ -105,9 +105,9 @@ export default function CatalogPage() {
           </label>
 
           <label>
-            <span>Kategoria</span>
+            <span>Kategória</span>
             <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-              <option value="">Osszes</option>
+              <option value="">Összes</option>
               {state.categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -117,21 +117,21 @@ export default function CatalogPage() {
           </label>
 
           <label>
-            <span>Rendezes</span>
+            <span>Rendezés</span>
             <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-              <option value="price_asc">Ar szerint novekvo</option>
-              <option value="price_desc">Ar szerint csokkeno</option>
-              <option value="name_asc">Nev szerint A-Z</option>
+              <option value="price_asc">Ár szerint növekvő</option>
+              <option value="price_desc">Ár szerint csökkenő</option>
+              <option value="name_asc">Név szerint A-Z</option>
             </select>
           </label>
         </div>
       </section>
 
-      {isLoading ? <LoadingState text="Alkatreszek betoltese..." /> : null}
+      {isLoading ? <LoadingState text="Alkatrészek betöltése..." /> : null}
       {!isLoading && error ? <ErrorState message={error} /> : null}
 
       {!isLoading && !error && components.length === 0 ? (
-        <EmptyState title="Nincs talalat" text="Probalj masik keresesi kifejezest vagy kategoriat." />
+        <EmptyState title="Nincs találat" text="Próbálj másik keresési kifejezést vagy kategóriát." />
       ) : null}
 
       {!isLoading && !error && components.length > 0 ? (
@@ -143,7 +143,7 @@ export default function CatalogPage() {
               <p>{item.category_name}</p>
               <p className="price-tag">{item.price_huf.toLocaleString("hu-HU")} Ft</p>
               <button type="button" className="btn btn-secondary">
-                Hozzaadas
+                Hozzáadás
               </button>
             </article>
           ))}

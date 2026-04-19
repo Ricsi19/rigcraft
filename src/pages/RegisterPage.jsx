@@ -32,7 +32,7 @@ export default function RegisterPage() {
       await register(form);
       navigate("/", { replace: true });
     } catch (error) {
-      setServerError(error.message || "Sikertelen regisztracio.");
+      setServerError(error.message || "Sikertelen regisztráció.");
     } finally {
       setIsSubmitting(false);
     }
@@ -41,15 +41,21 @@ export default function RegisterPage() {
   return (
     <main className="container content-stack auth-page">
       <PageHeader
-        title="Regisztracio"
-        subtitle="Email/jelszo alapu regisztracio kliens es szerver oldali validacioval."
+        title="Regisztráció"
+        subtitle="Hozz létre fiókot pár lépésben, és mentsd el a saját konfigurációidat."
       />
 
+      <div className="row gap-sm wrap">
+        <Link className="btn btn-secondary" to="/">
+          Vissza a kezdőoldalra
+        </Link>
+      </div>
+
       <section className="card auth-card" aria-labelledby="register-form-title">
-        <h3 id="register-form-title">Uj fiok letrehozasa</h3>
+        <h3 id="register-form-title">Új fiók létrehozása</h3>
         <form className="stack" onSubmit={handleSubmit} noValidate>
           <label>
-            <span>Megjelenitesi nev</span>
+            <span>Megjelenítési név</span>
             <input
               type="text"
               value={form.displayName}
@@ -81,7 +87,7 @@ export default function RegisterPage() {
           ) : null}
 
           <label>
-            <span>Jelszo</span>
+            <span>Jelszó</span>
             <input
               type="password"
               value={form.password}
@@ -96,7 +102,7 @@ export default function RegisterPage() {
             </p>
           ) : (
             <p id="register-password-help" className="muted">
-              Jelszo szabaly: legalabb 8 karakter, 1 nagybetu, 1 szam, 1 specialis karakter.
+              Jelszó szabály: legalább 8 karakter, 1 nagybetű, 1 szám, 1 speciális karakter.
             </p>
           )}
 
@@ -111,12 +117,12 @@ export default function RegisterPage() {
           {serverError ? <p className="field-error">{serverError}</p> : null}
 
           <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Regisztracio..." : "Regisztracio"}
+            {isSubmitting ? "Regisztráció..." : "Regisztráció"}
           </button>
         </form>
 
         <p>
-          Van mar fiokod? <Link to="/login">Lepj be itt</Link>
+          Van már fiókod? <Link to="/login">Lépj be itt</Link>
         </p>
       </section>
     </main>

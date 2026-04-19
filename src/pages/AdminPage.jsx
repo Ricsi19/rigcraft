@@ -54,7 +54,7 @@ export default function AdminPage() {
         if (!isMounted) {
           return;
         }
-        setError(err.message || "Admin adatok betoltese sikertelen.");
+        setError(err.message || "Az admin adatok betöltése sikertelen.");
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -78,29 +78,29 @@ export default function AdminPage() {
 
   function validateCategory() {
     if (categoryForm.name.trim().length < 2) {
-      return "A kategoria neve legalabb 2 karakter legyen.";
+      return "A kategória neve legalább 2 karakter legyen.";
     }
     if (categoryForm.slug.trim().length < 2) {
-      return "A slug legalabb 2 karakter legyen.";
+      return "A slug legalább 2 karakter legyen.";
     }
     return "";
   }
 
   function validateComponent() {
     if (!componentForm.category_id) {
-      return "Kategoria kotelezo.";
+      return "A kategória megadása kötelező.";
     }
     if (componentForm.name.trim().length < 2) {
-      return "Az alkatresz neve legalabb 2 karakter legyen.";
+      return "Az alkatrész neve legalább 2 karakter legyen.";
     }
     if (componentForm.brand.trim().length < 2) {
-      return "A marka kotelezo.";
+      return "A márka megadása kötelező.";
     }
     if (Number(componentForm.price_huf) < 0 || componentForm.price_huf === "") {
-      return "Az ar kotelezo es nem lehet negativ.";
+      return "Az ár kötelező, és nem lehet negatív.";
     }
     if (Number(componentForm.watt_usage) < 0 || componentForm.watt_usage === "") {
-      return "A fogyasztas kotelezo es nem lehet negativ.";
+      return "A fogyasztás kötelező, és nem lehet negatív.";
     }
     return "";
   }
@@ -130,29 +130,29 @@ export default function AdminPage() {
     try {
       if (categoryForm.id) {
         await categoryService.update(categoryForm.id, payload);
-        dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Kategoria frissitve." } });
+        dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Kategória frissítve." } });
       } else {
         await categoryService.create(payload);
-        dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Kategoria letrehozva." } });
+        dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Kategória létrehozva." } });
       }
       await refreshLists();
       setCategoryForm(initialCategoryForm);
       setCategoryError("");
     } catch (err) {
-      setCategoryError(err.message || "Muvelet sikertelen.");
+      setCategoryError(err.message || "A művelet sikertelen.");
     }
   }
 
   async function deleteCategory(id) {
-    if (!window.confirm("Biztosan torlod ezt a kategoriat?")) {
+    if (!window.confirm("Biztosan törlöd ezt a kategóriát?")) {
       return;
     }
     try {
       await categoryService.remove(id);
       await refreshLists();
-      dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Kategoria torolve." } });
+      dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Kategória törölve." } });
     } catch (err) {
-      dispatch({ type: "SET_TOAST", payload: { type: "error", message: err.message || "Torlesi hiba." } });
+      dispatch({ type: "SET_TOAST", payload: { type: "error", message: err.message || "Törlési hiba." } });
     }
   }
 
@@ -177,29 +177,29 @@ export default function AdminPage() {
     try {
       if (componentForm.id) {
         await componentService.update(componentForm.id, payload);
-        dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Alkatresz frissitve." } });
+        dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Alkatrész frissítve." } });
       } else {
         await componentService.create(payload);
-        dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Alkatresz letrehozva." } });
+        dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Alkatrész létrehozva." } });
       }
       await refreshLists();
       setComponentForm(initialComponentForm);
       setComponentError("");
     } catch (err) {
-      setComponentError(err.message || "Muvelet sikertelen.");
+      setComponentError(err.message || "A művelet sikertelen.");
     }
   }
 
   async function deleteComponent(id) {
-    if (!window.confirm("Biztosan torlod ezt az alkatreszt?")) {
+    if (!window.confirm("Biztosan törlöd ezt az alkatrészt?")) {
       return;
     }
     try {
       await componentService.remove(id);
       await refreshLists();
-      dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Alkatresz torolve." } });
+      dispatch({ type: "SET_TOAST", payload: { type: "success", message: "Alkatrész törölve." } });
     } catch (err) {
-      dispatch({ type: "SET_TOAST", payload: { type: "error", message: err.message || "Torlesi hiba." } });
+      dispatch({ type: "SET_TOAST", payload: { type: "error", message: err.message || "Törlési hiba." } });
     }
   }
 
@@ -207,21 +207,21 @@ export default function AdminPage() {
     <>
       <PageHeader
         title="Admin panel"
-        subtitle="Teljes CRUD: kategoriak es alkatreszek kezelese valodi backend muveletekkel."
+        subtitle="Kategóriák és alkatrészek kezelése egy helyen."
       />
 
       {role === "admin" ? (
         <>
-          {isLoading ? <LoadingState text="Admin modul betoltese..." /> : null}
+          {isLoading ? <LoadingState text="Admin felület betöltése..." /> : null}
           {!isLoading && error ? <ErrorState message={error} /> : null}
           {!isLoading && !error ? (
-            <section className="stack" aria-label="Admin CRUD modulok">
+            <section className="stack" aria-label="Admin kezelőfelület">
               <article className="card">
-                <h3>Kategoria CRUD</h3>
+                <h3>Kategóriák kezelése</h3>
                 <form className="stack" onSubmit={submitCategory}>
                   <div className="filter-grid">
                     <label>
-                      <span>Nev</span>
+                      <span>Név</span>
                       <input
                         type="text"
                         value={categoryForm.name}
@@ -242,7 +242,7 @@ export default function AdminPage() {
                   {categoryError ? <p className="field-error">{categoryError}</p> : null}
                   <div className="row gap-sm wrap">
                     <button type="submit" className="btn btn-primary">
-                      {categoryForm.id ? "Frissites" : "Letrehozas"}
+                      {categoryForm.id ? "Frissítés" : "Létrehozás"}
                     </button>
                     {categoryForm.id ? (
                       <button
@@ -250,7 +250,7 @@ export default function AdminPage() {
                         className="btn btn-secondary"
                         onClick={() => setCategoryForm(initialCategoryForm)}
                       >
-                        Megse
+                        Mégse
                       </button>
                     ) : null}
                   </div>
@@ -269,10 +269,10 @@ export default function AdminPage() {
                           className="btn btn-secondary"
                           onClick={() => setCategoryForm({ id: category.id, name: category.name, slug: category.slug })}
                         >
-                          Szerkesztes
+                          Szerkesztés
                         </button>
                         <button type="button" className="btn btn-secondary" onClick={() => deleteCategory(category.id)}>
-                          Torles
+                          Törlés
                         </button>
                       </div>
                     </div>
@@ -281,17 +281,17 @@ export default function AdminPage() {
               </article>
 
               <article className="card">
-                <h3>Alkatresz CRUD</h3>
+                <h3>Alkatrészek kezelése</h3>
                 <form className="stack" onSubmit={submitComponent}>
                   <div className="filter-grid">
                     <label>
-                      <span>Kategoria</span>
+                      <span>Kategória</span>
                       <select
                         value={componentForm.category_id}
                         onChange={(event) => updateComponentField("category_id", event.target.value)}
                         required
                       >
-                        <option value="">Valassz kategoriat</option>
+                        <option value="">Válassz kategóriát</option>
                         {state.categories.map((category) => (
                           <option key={category.id} value={category.id}>
                             {category.name}
@@ -300,7 +300,7 @@ export default function AdminPage() {
                       </select>
                     </label>
                     <label>
-                      <span>Nev</span>
+                      <span>Név</span>
                       <input
                         type="text"
                         value={componentForm.name}
@@ -309,7 +309,7 @@ export default function AdminPage() {
                       />
                     </label>
                     <label>
-                      <span>Marka</span>
+                      <span>Márka</span>
                       <input
                         type="text"
                         value={componentForm.brand}
@@ -327,7 +327,7 @@ export default function AdminPage() {
                       />
                     </label>
                     <label>
-                      <span>Ar (HUF)</span>
+                      <span>Ár (HUF)</span>
                       <input
                         type="number"
                         min="0"
@@ -337,7 +337,7 @@ export default function AdminPage() {
                       />
                     </label>
                     <label>
-                      <span>Fogyasztas (W)</span>
+                      <span>Fogyasztás (W)</span>
                       <input
                         type="number"
                         min="0"
@@ -347,7 +347,7 @@ export default function AdminPage() {
                       />
                     </label>
                     <label>
-                      <span>Keszlet statusz</span>
+                      <span>Készlet státusz</span>
                       <select
                         value={componentForm.stock_status}
                         onChange={(event) => updateComponentField("stock_status", event.target.value)}
@@ -364,7 +364,7 @@ export default function AdminPage() {
 
                   <div className="row gap-sm wrap">
                     <button type="submit" className="btn btn-primary">
-                      {componentForm.id ? "Frissites" : "Letrehozas"}
+                      {componentForm.id ? "Frissítés" : "Létrehozás"}
                     </button>
                     {componentForm.id ? (
                       <button
@@ -372,7 +372,7 @@ export default function AdminPage() {
                         className="btn btn-secondary"
                         onClick={() => setComponentForm(initialComponentForm)}
                       >
-                        Megse
+                        Mégse
                       </button>
                     ) : null}
                   </div>
@@ -404,7 +404,7 @@ export default function AdminPage() {
                             })
                           }
                         >
-                          Szerkesztes
+                          Szerkesztés
                         </button>
                         <button
                           type="button"

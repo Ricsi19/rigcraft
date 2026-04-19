@@ -33,7 +33,7 @@ export default function LoginPage() {
       await login(form);
       navigate(fromPath, { replace: true });
     } catch (error) {
-      setServerError(error.message || "Sikertelen bejelentkezes.");
+      setServerError(error.message || "Sikertelen bejelentkezés.");
     } finally {
       setIsSubmitting(false);
     }
@@ -42,12 +42,18 @@ export default function LoginPage() {
   return (
     <main className="container content-stack auth-page">
       <PageHeader
-        title="Bejelentkezes"
-        subtitle="Email es jelszo alapu autentikacio. Hibas adatok eseten visszajelzest kapsz."
+        title="Bejelentkezés"
+        subtitle="Add meg az e-mail címedet és a jelszavadat a folytatáshoz."
       />
 
+      <div className="row gap-sm wrap">
+        <Link className="btn btn-secondary" to="/">
+          Vissza a kezdőoldalra
+        </Link>
+      </div>
+
       <section className="card auth-card" aria-labelledby="login-form-title">
-        <h3 id="login-form-title">Felhasznaloi belepes</h3>
+        <h3 id="login-form-title">Belépés</h3>
         <form className="stack" onSubmit={handleSubmit} noValidate>
           <label>
             <span>Email</span>
@@ -66,7 +72,7 @@ export default function LoginPage() {
           ) : null}
 
           <label>
-            <span>Jelszo</span>
+            <span>Jelszó</span>
             <input
               type="password"
               value={form.password}
@@ -84,12 +90,12 @@ export default function LoginPage() {
           {serverError ? <p className="field-error">{serverError}</p> : null}
 
           <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Bejelentkezes..." : "Bejelentkezes"}
+            {isSubmitting ? "Bejelentkezés..." : "Bejelentkezés"}
           </button>
         </form>
 
         <p>
-          Nincs fiokod? <Link to="/register">Regisztralj itt</Link>
+          Nincs fiókod? <Link to="/register">Regisztrálj itt</Link>
         </p>
       </section>
     </main>

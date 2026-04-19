@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children, requiredRole }) {
   const location = useLocation();
 
   if (isLoading) {
-    return <LoadingState text="Bejelentkezesi allapot ellenorzese..." />;
+    return <LoadingState text="Bejelentkezési állapot ellenőrzése..." />;
   }
 
   if (!isAuthenticated) {
